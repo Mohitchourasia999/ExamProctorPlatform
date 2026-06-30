@@ -1,0 +1,98 @@
+﻿@model IEnumerable<ExamProctorPlatform.Models.Question>
+
+@{
+    ViewData["Title"] = "Admin Dashboard";
+    var sessions = ViewBag.Sessions as List<ExamProctorPlatform.Models.ExamSession>;
+}
+
+<div class="container mt-4">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h2 class="text-primary">⚙️ Admin Control Panel & Telemetry</h2>
+        <a asp-action="Create" class="btn btn-success">+ Add New Question</a>
+    </div>
+
+    <div class="card shadow mb-5">
+        <div class="card-header bg-dark text-white">
+            <h4 class="mb-0">📚 Active Question Bank (CRUD)</h4>
+        </div>
+        <div class="card-body">
+            <table class="table table-bordered table-striped">
+                <thead class="table-secondary">
+                    <tr>
+                        <th>ID</th>
+                        <th>Question Plain Text</th>
+                        <th>Correct Key/Target</th>
+                        <th>Marks</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @if (!Model.Any())
+                    {
+                        <tr>
+                            <td colspan="5" class="text-center text-muted">No questions in bank. Click Add New to populate.</td>
+                        </tr>
+                    }
+                    @foreach (var item in Model)
+                    {
+                        <tr>
+                            <td>@item.Id</td>
+                            <td>@item.QuestionText</td>
+                            <td><span class="badge bg-info text-dark">@item.CorrectAnswer</span></td>
+                            <td>@item.Marks</td>
+                            <td>
+                                <a asp-action="Delete" asp-route-id="@item.Id" class="btn btn-sm btn-danger" onclick="return confirm('Kya aap is question ko delete karna chahte hain?');">Delete</a>
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <div class="card shadow">
+        <div class="card-header bg-danger text-white">
+            <h4 class="mb-0">🛡️ Student Proctoring Tally Logs</h4>
+        </div>
+        <div class="card-body">
+            <table class="table table-hover">
+                <thead class="table-dark">
+                    <tr>
+                        <th>Session ID</th>
+                        <th>User ID</th>
+                        <th>Tab Switches (Max 3)</th>
+                        <th>Mouse Leaks</th>
+                        <th>Copy Attempts</th>
+                        <th>Status Status</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @if (sessions == null || !sessions.Any())
+                    {
+                        <tr>
+                            <td colspan="6" class="text-center text-muted">No active exam sessions tracked yet.</td>
+                        </tr>
+                    }
+                    else
+                    {
+                        foreach (var session in sessions)
+                        {
+                            <tr class="@(session.Status == "Blocked_By_Violation" ? "table-danger" : "")">
+                                <td>@session.Id</td>
+                                <td>@session.UserId</td>
+                                <td><strong>@session.TabSwitches</strong> / 3</td>
+                                <td>@session.MouseLeaks</td>
+                                <td>@session.CopyAttempts</td>
+                                <td>
+                                    <span class="badge @(session.Status == "Blocked_By_Violation" ? "bg-danger" : "bg-success")">
+                                        @session.Status
+                                    </span>
+                                </td>
+                            </tr>
+                        }
+                    }
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>

@@ -1,0 +1,42 @@
+﻿@model ExamProctorPlatform.Models.User
+
+@{
+    ViewData["Title"] = "Register";
+}
+
+<div class="row justify-content-center mt-5">
+    <div class="col-md-5">
+        <div class="card shadow">
+            <div class="card-header bg-primary text-white text-center">
+                <h3>Create New Account</h3>
+            </div>
+            <div class="card-body">
+                <form asp-action="Register" method="post">
+                    <div class="form-group mb-3">
+                        <label class="form-label">Full Name</label>
+                        <input asp-for="Name" class="form-control" placeholder="Enter your name" required />
+                    </div>
+                    <div class="form-group mb-3">
+                        <label class="form-label">Email Address</label>
+                        <input asp-for="Email" type="email" class="form-control" placeholder="Enter email" required />
+                    </div>
+                    <div class="form-group mb-3">
+                        <label class="form-label">Password</label>
+                        <input asp-for="PasswordHash" type="password" class="form-control" placeholder="Choose a password" required />
+                    </div>
+                    <div class="form-group mb-4">
+                        <label class="form-label">Register As (Select Role)</label>
+                        <select asp-for="Role" class="form-select">
+                            <option value="Student">Student (Exam Candidate)</option>
+                            <option value="Admin">Admin (Professor / HR)</option>
+                        </select>
+                    </div>
+                    <button type="submit" class="btn btn-primary w-100 mb-2">Register Now</button>
+                </form>
+                <div class="text-center">
+                    <a asp-action="Login" class="text-decoration-none">Already have an account? Login here</a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

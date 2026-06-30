@@ -1,0 +1,124 @@
+﻿@model ExamProctorPlatform.Models.CodingQuestion
+
+@{
+    ViewData["Title"] = "AI Automated Code Arena";
+}
+
+<div class="container-fluid mt-3 bg-dark min-vh-100 py-3 text-white">
+    <div class="row px-2">
+
+        <div class="col-md-4">
+            <div class="card bg-secondary text-white border-0 shadow mb-3">
+                <div class="card-header bg-black py-3 border-bottom border-success">
+                    <h5 class="mb-0 text-success">📝 Target Specification Blueprint</h5>
+                </div>
+                <div class="card-body font-monospace small">
+                    <p class="fs-6 fw-bold">@Model.Title</p>
+                    <p style="white-space: pre-line;">@Model.ProblemStatement</p>
+                </div>
+            </div>
+
+            <div class="card bg-black text-white border-0 shadow">
+                <div class="card-header bg-danger text-center fw-bold small py-2">
+                    🔴 SYSTEM INTELLIGENCE SECURITY AGENT ACTIVE
+                </div>
+                <div class="card-body p-2 text-center" style="position: relative;">
+                    <video id="ai-webcam" autoplay playsinline muted width="100%" height="220" style="object-fit: cover; border-radius: 6px;"></video>
+
+                    <div id="ai-status-badge" class="badge bg-warning p-2 text-dark w-100 mt-2 font-monospace">
+                        🤖 AI Node initialization...
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-8">
+            <div class="card bg-dark text-white border-secondary shadow">
+                <div class="card-header bg-black d-flex justify-content-between align-items-center py-2">
+                    <span class="text-success fw-bold">💻 Enterprise Multi-Test Compilation Grid</span>
+                    <span class="badge bg-success">Language Node: C#</span>
+                </div>
+                <div class="card-body p-0">
+                    <div id="code-editor" style="height: 480px; font-size: 16px;">@Model.StarterCode</div>
+                </div>
+                <div class="card-footer bg-black d-flex justify-content-between align-items-center py-3">
+                    <button class="btn btn-success fw-bold px-4 text-black border-0" onclick="compileOnServer()">🚀 Run Global Bench Test</button>
+                    <div id="console-output" class="fw-bold font-monospace px-3 text-secondary">Console Status: Connected.</div>
+                </div>
+            </div>
+        </div>
+
+    </div>
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/ace/1.23.0/ace.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/@@vladmandic/face-api/dist/face-api.js"></script>
+
+<script>
+    // 1. Setup Code Editor IDE Workspace Configuration
+    var editor = ace.edit("code-editor");
+    editor.setTheme("ace/theme/monokai");
+    editor.session.setMode("ace/mode/csharp");
+    editor.setShowPrintMargin(false);
+
+    // 2. Hardware Live WebCam Stream Allocator Hooks
+    const videoNode = document.getElementById('ai-webcam');
+    const aiStatusBadge = document.getElementById('ai-status-badge');
+
+    navigator.mediaDevices.getUserMedia({ video: true })
+    .then(stream => { videoNode.srcObject = stream; })
+    .catch(err => { alert("Camera allocation blocked state."); });
+
+    // 3. AI Face Tracking Vision Core Pipeline
+    // Real time inference processing loop checks
+    videoNode.addEventListener('play', () => {
+    aiStatusBadge.className = "badge bg-info p-2 text-dark w-100 mt-2 font-monospace";
+    aiStatusBadge.innerText = "⏳ Loading AI Weights Models...";
+
+    // Load Tiny Face Detector weights from public cdn infrastructure layers
+    Promise.all([
+    faceapi.nets.tinyFaceDetector.loadFromUri('https://cdn.jsdelivr.net/npm/@@vladmandic/face-api/model/'),
+    ]).then(() => {
+    aiStatusBadge.className = "badge bg-success p-2 text-white w-100 mt-2 font-monospace";
+    aiStatusBadge.innerText = "✅ AI Guard Online: Target Scanning Checked";
+
+    // Continuous verification daemon ticker block
+    setInterval(async () => {
+    const faceDetections = await faceapi.detectAllFaces(videoNode, new faceapi.TinyFaceDetectorOptions());
+
+    if (faceDetections.length === 0) {
+    aiStatusBadge.className = "badge bg-danger p-2 text-white w-100 mt-2 font-monospace animated-flash";
+    aiStatusBadge.innerText = "🚨 ALERT: Candidate Face Missing!";
+    } else if (faceDetections.length > 1) {
+    aiStatusBadge.className = "badge bg-danger p-2 text-white w-100 mt-2 font-monospace";
+    aiStatusBadge.innerText = "🚨 SEVERE EXCEPTION: Multiple Profiles Detected!";
+    } else {
+    aiStatusBadge.className = "badge bg-success p-2 text-white w-100 mt-2 font-monospace";
+    aiStatusBadge.innerText = "🟢 Security State Valid: Monitored Clear";
+    }
+    }, 800); // Check face posture frame updates rules parameters bounds every 800 milliseconds
+    });
+    });
+
+    function compileOnServer() {
+    const consoleBox = document.getElementById("console-output");
+    consoleBox.className = "fw-bold font-monospace px-3 text-warning";
+    consoleBox.innerText = "Executing deep automated server benches matrix tests...";
+
+    fetch('/Coding/CompileCode', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+    body: new URLSearchParams({ 'userCode': editor.getValue() })
+    })
+    .then(res => res.json())
+    .then(data => {
+    if(data.success) {
+    consoleBox.className = "fw-bold font-monospace px-3 text-success";
+    consoleBox.innerText = data.message;
+    } else {
+    consoleBox.className = "fw-bold font-monospace px-3 text-danger";
+    consoleBox.innerText = data.message;
+    }
+    });
+    }
+</script>

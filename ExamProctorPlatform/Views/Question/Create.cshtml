@@ -1,0 +1,59 @@
+﻿@model ExamProctorPlatform.Models.Question
+
+@{
+    ViewData["Title"] = "Advanced Question Wizard";
+}
+
+<div class="row justify-content-center mt-4">
+    <div class="col-md-6">
+        <div class="card shadow border-0">
+            <div class="card-header bg-dark text-white text-center py-3">
+                <h4 class="mb-0">🧠 Create Advanced MCQ Assessment</h4>
+            </div>
+            <div class="card-body p-4">
+                <form asp-action="Create" method="post">
+                    <div class="form-group mb-3">
+                        <label class="form-label fw-bold">Question Statement</label>
+                        <textarea asp-for="QuestionText" class="form-control" rows="3" placeholder="Type core problem statement..." required></textarea>
+                    </div>
+
+                    <input type="hidden" asp-for="OptionsJson" id="options-hidden-bridge" />
+
+                    <div class="card bg-light p-3 mb-3 border-0">
+                        <label class="form-label fw-bold text-secondary">🔧 Configure MCQ Choices Options</label>
+                        <div class="input-group mb-2"><input type="text" class="form-control option-input" placeholder="Option A" required /></div>
+                        <div class="input-group mb-2"><input type="text" class="form-control option-input" placeholder="Option B" required /></div>
+                        <div class="input-group mb-2"><input type="text" class="form-control option-input" placeholder="Option C" required /></div>
+                        <div class="input-group mb-2"><input type="text" class="form-control option-input" placeholder="Option D" required /></div>
+                    </div>
+
+                    <div class="form-group mb-3">
+                        <label class="form-label fw-bold text-success">🎯 Exact Correct Match (Answer Key)</label>
+                        <input asp-for="CorrectAnswer" class="form-control" id="correct-ans-field" placeholder="Must match one of the options text exactly" required />
+                    </div>
+
+                    <div class="form-group mb-4">
+                        <label class="form-label fw-bold">Weightage Marks</label>
+                        <input asp-for="Marks" type="number" class="form-control" value="4" required />
+                    </div>
+
+                    <div class="d-flex justify-content-between">
+                        <a asp-action="Index" class="btn btn-outline-secondary">Back</a>
+                        <button type="submit" id="submit-btn" class="btn btn-dark px-4">Compile Question</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    document.getElementById("submit-btn").addEventListener("click", function() {
+        let opts = [];
+        document.querySelectorAll(".option-input").forEach(input => {
+            if(input.value.trim() !== "") opts.push(input.value.trim());
+        });
+        // Conver array elements into single serialised string schema packet
+        document.getElementById("options-hidden-bridge").value = JSON.stringify(opts);
+    });
+</script>

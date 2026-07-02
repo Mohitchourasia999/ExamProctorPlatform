@@ -1,70 +1,307 @@
 ﻿@model IEnumerable<ExamProctorPlatform.Models.ExamSession>
 
 @{
-    ViewData["Title"] = "Subject Results Breakdown";
+    ViewData["Title"] = "Results Dashboard";
 
-    // Sort logic structure: Active/Completed sorted by high score first, all Blocked users forced down below
-    var sortedSessions = Model.Where(s => s.Status != "Blocked_By_Violation").OrderByDescending(s => s.Score)
-                         .Concat(Model.Where(s => s.Status == "Blocked_By_Violation"))
-                         .ToList();
+    var sortedSessions = Model
+        .Where(s => s.Status != "Blocked_By_Violation")
+        .OrderByDescending(s => s.Score)
+        .Concat(Model.Where(s => s.Status == "Blocked_By_Violation"))
+        .ToList();
 }
 
-<div class="container mt-4">
-    <div class="mb-4">
-        <a asp-action="Index" class="btn btn-sm btn-outline-secondary">⬅ Back to Dashboard</a>
-        <h2 class="text-primary mt-2">Performance Tally: @ViewBag.Subject</h2>
+<div class="container py-5">
+
+    <div class="d-flex justify-content-between align-items-center mb-4">
+
+        <div>
+
+            <h2 class="fw-bold">
+
+                <i class="bi bi-bar-chart-fill text-primary"></i>
+
+                @ViewBag.Subject Results
+
+            </h2>
+
+            <p class="text-muted mb-0">
+
+                Performance overview of all candidates.
+
+            </p>
+
+        </div>
+
+        <a asp-action="Index"
+           class="btn btn-outline-secondary">
+
+            <i class="bi bi-arrow-left"></i>
+
+            Dashboard
+
+        </a>
+
     </div>
 
-    <div class="card shadow">
-        <div class="card-header bg-danger text-white">
-            <h4 class="mb-0">Student Integrity Assessment Grid</h4>
+    <div class="row mb-4">
+
+        <div class="col-md-4">
+
+            <div class="card border-0 shadow-sm">
+
+                <div class="card-body text-center">
+
+                    <i class="bi bi-people-fill display-4 text-primary"></i>
+
+                    <h6 class="text-muted mt-3">
+
+                        Total Candidates
+
+                    </h6>
+
+                    <h2>
+
+                        @sortedSessions.Count
+
+                    </h2>
+
+                </div>
+
+            </div>
+
         </div>
-        <div class="card-body">
-            <table class="table table-hover align-middle">
-                <thead class="table-dark">
+
+        <div class="col-md-4">
+
+            <div class="card border-0 shadow-sm">
+
+                <div class="card-body text-center">
+
+                    <i class="bi bi-check-circle-fill display-4 text-success"></i>
+
+                    <h6 class="text-muted mt-3">
+
+                        Completed
+
+                    </h6>
+
+                    <h2>
+
+                        @sortedSessions.Count(x => x.Status == "Completed")
+
+                    </h2>
+
+                </div>
+
+            </div>
+
+        </div>
+
+        <div class="col-md-4">
+
+            <div class="card border-0 shadow-sm">
+
+                <div class="card-body text-center">
+
+                    <i class="bi bi-shield-fill-x display-4 text-danger"></i>
+
+                    <h6 class="text-muted mt-3">
+
+                        Blocked
+
+                    </h6>
+
+                    <h2>
+
+                        @sortedSessions.Count(x => x.Status == "Blocked_By_Violation")
+
+                    </h2>
+
+                </div>
+
+            </div>
+
+        </div>
+
+    </div>
+
+    <div class="card border-0 shadow">
+
+        <div class="card-header bg-white">
+
+            <div class="row">
+
+                <div class="col-md-6">
+
+                    <h5 class="mb-0 fw-bold">
+
+                        <i class="bi bi-table"></i>
+
+                        Student Results
+
+                    </h5>
+
+                </div>
+
+                <div class="col-md-6">
+
+                    <input id="searchBox"
+                           class="form-control"
+                           placeholder="Search Student ID..." />
+
+                </div>
+
+            </div>
+
+        </div>
+
+        <div class="table-responsive">
+
+            <table class="table table-hover align-middle mb-0">
+
+                <thead class="table-light">
+
                     <tr>
-                        <th>Session ID</th>
-                        <th>User ID</th>
-                        <th>Tab Violation Metrics Count</th>
+
+                        <th>Rank</th>
+
+                        <th>Student ID</th>
+
+                        <th>Violations</th>
+
                         <th>Status</th>
-                        <th>Final Exam Score</th>
+
+                        <th>Score</th>
+
                     </tr>
+
                 </thead>
-                <tbody>
-                    @if (sortedSessions == null || !sortedSessions.Any())
+
+                <tbody id="resultTable">
+
+                    @if (!sortedSessions.Any())
                     {
                         <tr>
-                            <td colspan="5" class="text-center text-muted">No student exam sheets recorded for this subject area framework.</td>
+
+                            <td colspan="5"
+                                class="text-center py-5 text-muted">
+
+                                <i class="bi bi-folder-x display-5"></i>
+
+                                <br />
+
+                                No Results Available
+
+                            </td>
+
                         </tr>
                     }
                     else
                     {
+                        int rank = 1;
+
                         foreach (var session in sortedSessions)
                         {
-                            <tr class="@(session.Status == "Blocked_By_Violation" ? "table-danger opacity-75" : "")">
-                                <td>@session.Id</td>
-                                <td>@session.UserId</td>
-                                <td><strong>@session.TabSwitches</strong> / 3 switches detected</td>
+                            <tr>
+
                                 <td>
-                                    <span class="badge @(session.Status == "Blocked_By_Violation" ? "bg-danger" : (session.Status == "Completed" ? "bg-success" : "bg-warning"))">
-                                        @session.Status
-                                    </span>
+
+                                    @rank
+
                                 </td>
+
                                 <td>
-                                    @if (session.Status == "Blocked_By_Violation")
+
+                                    @session.UserId
+
+                                </td>
+
+                                <td>
+
+                                    @session.TabSwitches / 3
+
+                                </td>
+
+                                <td>
+
+                                    @if (session.Status == "Completed")
                                     {
-                                        <span class="fw-bold text-danger">@session.Score marks (Blocked at ID #@session.LastQuestionProcessedId)</span>
+                                        <span class="badge bg-success">
+
+                                            Completed
+
+                                        </span>
+                                    }
+                                    else if (session.Status == "Blocked_By_Violation")
+                                    {
+                                        <span class="badge bg-danger">
+
+                                            Blocked
+
+                                        </span>
                                     }
                                     else
                                     {
-                                        <span class="fw-bold text-success">@session.Score marks</span>
+                                        <span class="badge bg-warning text-dark">
+
+                                            Active
+
+                                        </span>
                                     }
+
                                 </td>
+
+                                <td>
+
+                                    @if (session.Status == "Blocked_By_Violation")
+                                    {
+                                        <span class="text-danger fw-bold">
+
+                                            @session.Score
+
+                                        </span>
+                                    }
+                                    else
+                                    {
+                                        <span class="text-success fw-bold">
+
+                                            @session.Score
+
+                                        </span>
+                                    }
+
+                                </td>
+
                             </tr>
+
+                            rank++;
                         }
                     }
+
                 </tbody>
+
             </table>
+
         </div>
+
     </div>
+
 </div>
+
+<script>
+
+    document.getElementById("searchBox").addEventListener("keyup",function(){
+
+    let value=this.value.toLowerCase();
+
+    let rows=document.querySelectorAll("#resultTable tr");
+
+    rows.forEach(function(row){
+
+    row.style.display=row.innerText.toLowerCase().includes(value)?"":"none";
+
+    });
+
+    });
+
+</script>

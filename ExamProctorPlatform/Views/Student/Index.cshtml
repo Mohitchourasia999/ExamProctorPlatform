@@ -1,58 +1,260 @@
 ﻿@model IEnumerable<ExamProctorPlatform.Models.SubjectConfiguration>
+
 @{
-    ViewData["Title"] = "Student Grid Dashboard";
+    ViewData["Title"] = "Student Dashboard";
 }
 
-<div class="container mt-5">
-    <div class="p-3 bg-white shadow-sm rounded border-start border-success border-4 mb-4">
-        <h2 class="text-secondary mb-0">Student Assessment Gateway</h2>
-        <small class="text-muted font-monospace">Authorized Session Validation Active</small>
+<div class="container py-5">
+
+    <!-- Welcome Banner -->
+    <div class="card border-0 shadow-sm mb-5 dashboard-banner">
+        <div class="card-body p-5">
+
+            <div class="row align-items-center">
+
+                <div class="col-lg-8">
+
+                    <span class="badge bg-primary px-3 py-2 mb-3">
+                        Student Portal
+                    </span>
+
+                    <h1 class="fw-bold mb-3">
+                        Welcome,
+                        @User.Identity?.Name
+                    </h1>
+
+                    <p class="text-muted fs-5 mb-0">
+                        Select a subject below to begin your secure online examination.
+                        Your session will be monitored automatically once the exam starts.
+                    </p>
+
+                </div>
+
+                <div class="col-lg-4 text-center">
+
+                    <div class="display-1">
+                        🎓
+                    </div>
+
+                </div>
+
+            </div>
+
+        </div>
     </div>
+
+    <!-- Dashboard Stats -->
+
+    <div class="row mb-5">
+
+        <div class="col-md-4 mb-3">
+
+            <div class="card border-0 shadow-sm h-100">
+
+                <div class="card-body text-center">
+
+                    <div class="display-5 mb-3">
+                        📚
+                    </div>
+
+                    <h5 class="fw-bold">
+                        Available Subjects
+                    </h5>
+
+                    <h2 class="text-primary fw-bold">
+                        @(Model?.Count() ?? 0)
+                    </h2>
+
+                </div>
+
+            </div>
+
+        </div>
+
+        <div class="col-md-4 mb-3">
+
+            <div class="card border-0 shadow-sm h-100">
+
+                <div class="card-body text-center">
+
+                    <div class="display-5 mb-3">
+                        🛡️
+                    </div>
+
+                    <h5 class="fw-bold">
+                        Proctoring
+                    </h5>
+
+                    <span class="badge bg-success fs-6 px-3 py-2">
+                        Active
+                    </span>
+
+                </div>
+
+            </div>
+
+        </div>
+
+        <div class="col-md-4 mb-3">
+
+            <div class="card border-0 shadow-sm h-100">
+
+                <div class="card-body text-center">
+
+                    <div class="display-5 mb-3">
+                        ⏱️
+                    </div>
+
+                    <h5 class="fw-bold">
+                        Exam Mode
+                    </h5>
+
+                    <span class="badge bg-primary fs-6 px-3 py-2">
+                        Secure
+                    </span>
+
+                </div>
+
+            </div>
+
+        </div>
+
+    </div>
+
+    <!-- Subjects -->
+
+    <h3 class="fw-bold mb-4">
+        Available Assessments
+    </h3>
+
     <div class="row">
+
         @if (Model == null || !Model.Any())
         {
-            <div class="col-12 text-center text-muted p-5 bg-white rounded border border-light-subtle shadow-sm">
-                You are currently ineligible for any active testing cycles or no tracks match your CDAC profile parameters scores.
+            <div class="col-12">
+
+                <div class="card border-0 shadow-sm">
+
+                    <div class="card-body text-center py-5">
+
+                        <div class="display-4 mb-3">
+                            📭
+                        </div>
+
+                        <h4>
+                            No Active Assessments
+                        </h4>
+
+                        <p class="text-muted mb-0">
+                            There are currently no exams assigned to your account.
+                        </p>
+
+                    </div>
+
+                </div>
+
             </div>
         }
         else
         {
             foreach (var subject in Model)
             {
-                <div class="col-md-4 mb-4">
-                    <div class="card shadow-sm h-100 text-center border-0 bg-white rounded-3 overflow-hidden">
+                <div class="col-lg-4 col-md-6 mb-4">
+
+                    <div class="card border-0 shadow-sm subject-card h-100">
+
                         <div class="card-body p-4">
-                            <div class="fs-1 mb-2">📄</div>
-                            <h4 class="fw-bold text-dark mb-4">@subject.SubjectName</h4>
-                            <button class="btn btn-success w-100 py-2 fw-bold" onclick="launchExamPopup('@Url.Action("VerifyExamAccess", "Student", new { subject = subject.SubjectName })')">🚀 Launch Secure Exam Window</button>
+
+                            <div class="text-center">
+
+                                <div class="subject-icon mb-3">
+                                    📘
+                                </div>
+
+                                <h4 class="fw-bold mb-3">
+                                    @subject.SubjectName
+                                </h4>
+
+                                <p class="text-muted">
+                                    Secure online assessment with AI-based proctoring.
+                                </p>
+
+                            </div>
+
+                            <hr>
+
+                            <div class="d-grid">
+
+                                <button class="btn btn-primary btn-lg"
+                                        onclick="launchExamPopup('@Url.Action("VerifyExamAccess", "Student", new { subject = subject.SubjectName })')">
+
+                                    <i class="bi bi-play-circle-fill"></i>
+
+                                    Start Exam
+
+                                </button>
+
+                            </div>
+
                         </div>
+
                     </div>
+
                 </div>
             }
         }
+
     </div>
+
 </div>
 
 <script>
     function launchExamPopup(url) {
+
         const width = window.screen.availWidth;
         const height = window.screen.availHeight;
-        const popupOptions = `width=${width},height=${height},top=0,left=0,fullscreen=yes,directories=no,titlebar=no,toolbar=no,location=no,status=no,menubar=no,scrollbars=yes,resizable=no`;
 
-        const examWindow = window.open(url, "SecureExamPlatformWindow", popupOptions);
+        const popupOptions =
+            `width=${width},
+            height=${height},
+            top=0,
+            left=0,
+            fullscreen=yes,
+            toolbar=no,
+            location=no,
+            menubar=no,
+            status=no,
+            resizable=no,
+            scrollbars=yes`;
+
+        const examWindow = window.open(
+            url,
+            "SecureExamPlatformWindow",
+            popupOptions
+        );
+
         if (!examWindow) {
-            alert("🔒 Workspace initialization halted: Please allow window popups from browser toolbar configurations to launch the test frame.");
+
+            alert("Please allow popups to launch the secure examination.");
+
+            return;
         }
-        else {
-            const loopTimer = setInterval(() => {
-                if (examWindow.closed) {
-                    clearInterval(loopTimer);
-                    window.location.reload();
-                }
-                else {
-                    examWindow.focus();
-                }
-            }, 400);
-        }
+
+        const loopTimer = setInterval(() => {
+
+            if (examWindow.closed) {
+
+                clearInterval(loopTimer);
+
+                location.reload();
+
+            } else {
+
+                examWindow.focus();
+
+            }
+
+        }, 400);
+
     }
 </script>

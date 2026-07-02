@@ -6,7 +6,7 @@ using System.Security.Claims;
 
 namespace ExamProctorPlatform.Controllers
 {
-    [Authorize(Roles = "Student")]
+    [Authorize(Roles = "Student")] // Sirf Students ke liye entry gate
     public class StudentController : Controller
     {
         private readonly AppDbContext _context;
@@ -16,100 +16,38 @@ namespace ExamProctorPlatform.Controllers
             _context = context;
         }
 
-        // Main student dashboard listing active tests matching eligibility criteria
+        // Exam Arena main screening feed
         public IActionResult Index()
         {
+            // Current Logged-in Student ki ID extract karna session claim se
             var userIdStr = User.FindFirstValue("UserId");
             if (string.IsNullOrEmpty(userIdStr)) return RedirectToAction("Login", "Account");
-
-            int userId = int.Parse(userIdStr);
-            var student = _context.Users.Find(userId);
-
-            // Hide exam layouts from listing if candidate doesn't match baseline criteria requirements
-            var visibleSubjects = _context.SubjectConfigurations
-                                         .Where(c => student!.CdacPercentage >= c.CutoffPercentage)
-                                         .ToList();
-            return View(visibleSubjects);
-        }
-
-        // Bypasses all scheduling restrictions to route directly to the active exam canvas
-        public IActionResult VerifyExamAccess(string subject)
-        {
-            return RedirectToAction("TakeExam", new { subject = subject });
-        }
-
-        // Serves randomized problem entries and shuffles choices options dynamically
-        public IActionResult TakeExam(string subject)
-        {
-            var userIdStr = User.FindFirstValue("UserId");
-            if (string.IsNullOrEmpty(userIdStr)) return RedirectToAction("Login", "Account");
-
             int userId = int.Parse(userIdStr);
 
-            var session = _context.ExamSessions.FirstOrDefault(s => s.UserId == userId && s.Subject == subject && s.Status == "Active");
+            // Pehle check karein agar is student ka session database mein chal raha hai ya nahi
+            var session = _context.ExamSessions.FirstOrDefault(s => s.UserId == userId && s.Status == "Active");
+
             if (session == null)
             {
-                session = new ExamSession { UserId = userId, Subject = subject, Status = "Active", Score = 0 };
+                // Naya session allocate karna instant telemetry tracking ke liye
+                session = new ExamSession { UserId = userId, Status = "Active", Score = 0 };
                 _context.ExamSessions.Add(session);
                 _context.SaveChanges();
             }
 
-            if (session.Status == "Blocked_By_Violation") return RedirectToAction("Terminated");
-
-            var questions = _context.Questions.Where(q => q.Subject == subject).ToList();
-            var random = new Random();
-
-            // Dual shuffling configuration matrix setup
-            questions = questions.OrderBy(q => random.Next()).ToList(); // Shuffle question positions array
-
-            foreach (var q in questions)
+            if (session.Status == "Blocked_By_Violation")
             {
-                if (q.QuestionType == "Option" && q.Options != null && q.Options.Any())
-                {
-                    q.Options = q.Options.OrderBy(o => random.Next()).ToList(); // Shuffle nested choice indices
-                }
+                return RedirectToAction("Terminated");
             }
 
-            ViewBag.SessionId = session.Id;
-            ViewBag.Subject = subject;
-            return View(questions);
+            // Database se questions fetch karke live student view model par bhejna
+            var questions = _context.Questions.ToList();
+            ViewBag.SessionId = session.Id; // JavaScript connection pipeline link karne ke liye id backup
+
+            return RedirectToAction("Dashboard");
         }
 
-        // Processes input fields text tokens and calculates score values (+4 / -1 template metrics)
-        [HttpPost]
-        public IActionResult SubmitExam(IFormCollection form, int sessionId)
-        {
-            var session = _context.ExamSessions.Find(sessionId);
-            if (session == null || session.Status != "Active") return BadRequest("Invalid session footprint context.");
-
-            var questions = _context.Questions.Where(q => q.Subject == session.Subject).ToList();
-            int finalScore = 0;
-
-            foreach (var q in questions)
-            {
-                string submittedAns = form[$"question_{q.Id}"].ToString().Trim();
-                session.LastQuestionProcessedId = q.Id;
-
-                if (!string.IsNullOrEmpty(submittedAns))
-                {
-                    if (submittedAns.Equals(q.CorrectAnswer.Trim(), StringComparison.OrdinalIgnoreCase))
-                    {
-                        finalScore += q.PositiveMarks;
-                    }
-                    else
-                    {
-                        finalScore += q.NegativeMarks;
-                    }
-                }
-            }
-
-            session.Score = finalScore;
-            session.Status = "Completed";
-            _context.SaveChanges();
-
-            return Ok(new { success = true });
-        }
-
+        // Test auto termination error layout route
         public IActionResult Terminated()
         {
             return View();

@@ -1,28 +1,181 @@
 ﻿@model IEnumerable<ExamProctorPlatform.Models.SubjectConfiguration>
+
 @{
-    ViewData["Title"] = "Admin Control Suite";
+    ViewData["Title"] = "Admin Dashboard";
 }
 
-<div class="container mt-4">
+<div class="container py-5">
+
+    <!-- Header -->
     <div class="d-flex justify-content-between align-items-center mb-4">
-        <h2>Administrative Dashboard Terminal</h2>
-        <a asp-action="CreateSubjectConfig" class="btn btn-primary">➕ Create New Examination</a>
+
+        <div>
+
+            <h2 class="fw-bold mb-1">
+                <i class="bi bi-speedometer2 text-primary"></i>
+                Admin Dashboard
+            </h2>
+
+            <p class="text-muted mb-0">
+                Manage examinations and monitor student assessments.
+            </p>
+
+        </div>
+
+        <a asp-action="CreateSubjectConfig"
+           class="btn btn-primary btn-lg">
+
+            <i class="bi bi-plus-circle-fill"></i>
+
+            New Examination
+
+        </a>
+
     </div>
-    <div class="card shadow">
-        <div class="card-body p-0">
-            <table class="table table-striped mb-0 align-middle">
-                <thead class="table-dark">
+
+    <!-- Statistics -->
+
+    <div class="row mb-4">
+
+        <div class="col-md-4 mb-3">
+
+            <div class="card border-0 shadow-sm">
+
+                <div class="card-body text-center">
+
+                    <i class="bi bi-journal-bookmark-fill display-4 text-primary"></i>
+
+                    <h6 class="text-muted mt-3">
+                        Active Subjects
+                    </h6>
+
+                    <h2 class="fw-bold">
+                        @(Model?.Count() ?? 0)
+                    </h2>
+
+                </div>
+
+            </div>
+
+        </div>
+
+        <div class="col-md-4 mb-3">
+
+            <div class="card border-0 shadow-sm">
+
+                <div class="card-body text-center">
+
+                    <i class="bi bi-shield-check display-4 text-success"></i>
+
+                    <h6 class="text-muted mt-3">
+                        AI Proctoring
+                    </h6>
+
+                    <span class="badge bg-success fs-6">
+                        Active
+                    </span>
+
+                </div>
+
+            </div>
+
+        </div>
+
+        <div class="col-md-4 mb-3">
+
+            <div class="card border-0 shadow-sm">
+
+                <div class="card-body text-center">
+
+                    <i class="bi bi-people-fill display-4 text-warning"></i>
+
+                    <h6 class="text-muted mt-3">
+                        Admin Access
+                    </h6>
+
+                    <span class="badge bg-primary fs-6">
+                        Authorized
+                    </span>
+
+                </div>
+
+            </div>
+
+        </div>
+
+    </div>
+
+    <!-- Table -->
+
+    <div class="card border-0 shadow">
+
+        <div class="card-header bg-white">
+
+            <div class="row align-items-center">
+
+                <div class="col-md-6">
+
+                    <h5 class="fw-bold mb-0">
+
+                        <i class="bi bi-list-task"></i>
+
+                        Examination List
+
+                    </h5>
+
+                </div>
+
+                <div class="col-md-6">
+
+                    <input id="searchBox"
+                           type="text"
+                           class="form-control"
+                           placeholder="Search subject...">
+
+                </div>
+
+            </div>
+
+        </div>
+
+        <div class="table-responsive">
+
+            <table class="table table-hover align-middle mb-0">
+
+                <thead class="table-light">
+
                     <tr>
-                        <th>Subject Title Name</th>
-                        <th>Required Cutoff Grade (%)</th>
-                        <th class="text-center">Operations Options Actions</th>
+
+                        <th>Subject</th>
+
+                        <th>Cutoff</th>
+
+                        <th width="180">
+
+                            Action
+
+                        </th>
+
                     </tr>
+
                 </thead>
-                <tbody>
+
+                <tbody id="subjectTable">
+
                     @if (Model == null || !Model.Any())
                     {
                         <tr>
-                            <td colspan="3" class="text-center text-muted py-4">No examination models active. Click 'Create New Examination' to deploy an assessment grid.</td>
+
+                            <td colspan="3" class="text-center py-5 text-muted">
+
+                                <i class="bi bi-folder-x display-5"></i>
+
+                                <br /><br />
+
+                                No examinations created.
+
+                            </td>
+
                         </tr>
                     }
                     else
@@ -30,16 +183,69 @@
                         foreach (var subject in Model)
                         {
                             <tr>
-                                <td><strong class="text-primary">@subject.SubjectName</strong></td>
-                                <td><span class="badge bg-secondary">≥ @subject.CutoffPercentage %</span></td>
-                                <td class="text-center">
-                                    <a asp-action="SubjectResults" asp-route-subjectName="@subject.SubjectName" class="btn btn-sm btn-dark">View Scores Grid</a>
+
+                                <td>
+
+                                    <strong>
+
+                                        @subject.SubjectName
+
+                                    </strong>
+
                                 </td>
+
+                                <td>
+
+                                    <span class="badge bg-secondary">
+
+                                        @subject.CutoffPercentage%
+
+                                    </span>
+
+                                </td>
+
+                                <td>
+
+                                    <a asp-action="SubjectResults"
+                                       asp-route-subjectName="@subject.SubjectName"
+                                       class="btn btn-outline-primary btn-sm">
+
+                                        <i class="bi bi-bar-chart-fill"></i>
+
+                                        Results
+
+                                    </a>
+
+                                </td>
+
                             </tr>
                         }
                     }
+
                 </tbody>
+
             </table>
+
         </div>
+
     </div>
+
 </div>
+
+<script>
+
+    document.getElementById("searchBox").addEventListener("keyup",function(){
+
+    let value=this.value.toLowerCase();
+
+    let rows=document.querySelectorAll("#subjectTable tr");
+
+    rows.forEach(function(row){
+
+    row.style.display=row.innerText.toLowerCase().includes(value)?"":"none";
+
+    });
+
+    });
+
+</script>

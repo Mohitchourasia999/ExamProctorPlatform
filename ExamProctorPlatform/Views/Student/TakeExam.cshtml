@@ -10,21 +10,72 @@
 <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+
     <link rel="stylesheet" href="~/lib/bootstrap/dist/css/bootstrap.min.css" />
-    <title>Live Security Examination</title>
+
+    <link rel="stylesheet"
+          href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
+
+    <link rel="stylesheet" href="~/css/exam.css" asp-append-version="true" />
+
+    <title>
+
+        ExamProctor | Secure Examination
+
+    </title>
 </head>
-<body class="bg-light" style="user-select: none; -webkit-user-select: none; overflow: hidden;" oncontextmenu="return false;">
+<body class="exam-body" style="user-select: none; -webkit-user-select: none; overflow: hidden;" oncontextmenu="return false;">
 
     <input type="hidden" id="exam-session-id" value="@ViewBag.SessionId" />
 
+    <div class="progress exam-progress">
+
+        <div class="progress-bar"
+             style="width:0%"
+             id="progressBar">
+        </div>
+
+    </div>
+
     <div class="container-fluid vh-100 d-flex flex-column p-0" style="position: absolute; top: 0; left: 0; right: 0; bottom: 0;">
 
-        <div class="bg-white p-3 shadow-sm border-bottom border-danger border-4 d-flex justify-content-between align-items-center flex-shrink-0">
+        <div class="exam-header">
+
             <div>
-                <h4 class="text-dark mb-0 fw-bold">Live Examination Panel: @ViewBag.Subject</h4>
-                <span class="badge bg-danger font-monospace">🔴 SECURE ACTIVE DISCOVERY TUNNEL PROCTOR ONLINE</span>
+
+                <h3 class="mb-2 fw-bold">
+                    <i class="bi bi-journal-bookmark-fill"></i>
+
+                    @ViewBag.Subject Assessment
+                </h3>
+
+                <div class="text-muted">
+
+                    <i class="bi bi-person-circle"></i>
+
+                    <i class="bi bi-person-badge-fill"></i>
+
+                    Candidate
+                    @User.Identity?.Name
+
+                </div>
+
             </div>
-            <div class="fs-4 fw-bold text-danger bg-light px-4 py-2 rounded border border-danger-subtle shadow-sm">⚠️ DO NOT SWITCH WINDOWS</div>
+
+            <div class="d-flex align-items-center gap-3">
+
+                <div class="timer-box">
+
+                    <i class="bi bi-clock-fill"></i>
+
+                    <span id="timer">
+                        30:00
+                    </span>
+
+                </div>
+
+            </div>
+
         </div>
 
         <div class="d-flex flex-grow-1 overflow-hidden w-100">
@@ -35,29 +86,44 @@
 
                     @foreach (var q in Model)
                     {
-                        <div class="card shadow-sm border-0 mb-4 rounded-3 overflow-hidden">
-                            <div class="card-header bg-dark text-white py-3 d-flex justify-content-between align-items-center">
-                                <span><strong>Question ID: #@q.Id</strong></span>
-                                <span class="badge bg-info">Positive: +@q.PositiveMarks / Penalty: @q.NegativeMarks</span>
+                        <div class="question-card">
+                            <div class="question-header">
+                                <span>
+                                    <strong>
+                                        <i class="bi bi-patch-question-fill"></i>
+                                        Question @(Model.ToList().IndexOf(q) + 1)
+                                    </strong>
+                                </span>
+                                <span class="badge bg-info">
+                                    <i class="bi bi-award-fill"></i>
+
+                                    +@q.PositiveMarks
+
+                                    &nbsp;
+
+                                    <i class="bi bi-dash-circle-fill text-warning"></i>
+
+                                    -@q.NegativeMarks
+                                </span>
                             </div>
-                            <div class="card-body p-4 bg-white">
-                                <p class="fs-5 text-dark mb-4 fw-semibold">@q.QuestionText</p>
+                            <div class="question-body">
+                                <p class="question-title">
 
                                 <div class="options-container">
                                     @if (q.QuestionType == "Option" && q.Options != null && q.Options.Any())
                                     {
                                         @foreach (var option in q.Options)
                                         {
-                                            <div class="form-check p-3 mb-2 rounded border border-light-subtle layout-option-node" style="cursor: pointer;">
+                                                <div class="option-card" onclick="selectOption(this)">
                                                 <input class="form-check-input ms-1" type="radio" name="question_@q.Id" value="@option">
                                                 <label class="form-check-label ms-3 text-dark fw-medium">@option</label>
                                             </div>
                                         }
-                                        <button type="button" class="btn btn-sm btn-outline-secondary mt-2 font-monospace" onclick="clearSelection('question_@q.Id')">🧹 Clear Option Selection</button>
+                                            <button type="button" class="btn btn-outline-primary btn-sm mt-2 font-monospace" onclick="clearSelection('question_@q.Id')">🧹 Clear Option Selection</button>
                                     }
                                     else
                                     {
-                                        <textarea name="question_@q.Id" class="form-control anti-paste-field" rows="3" placeholder="Type answer text input key natively using keyboard keys..."></textarea>
+                                            <textarea name="question_@q.Id" class="form-control anti-paste-field" rows="3" placeholder="Type your answer here..."></textarea>
                                     }
                                 </div>
                             </div>
@@ -65,26 +131,46 @@
                     }
 
                     <div class="text-center my-5">
-                        <button type="submit" class="btn btn-danger btn-lg px-5 py-3 shadow fw-bold">Finalize Assessment Submission</button>
+                        <button type="submit" class="btn btn-primary btn-lg submit-btn px-5 py-3 shadow fw-bold">
+                            <i class="bi bi-check-circle-fill"></i>
+
+                            Submit Assessment
+                        </button>
                     </div>
                 </form>
             </div>
 
-            <div class="bg-white border-start p-3 d-flex flex-column align-items-center flex-shrink-0" style="width: 280px; height: 100%;">
+            <div class="proctor-sidebar" style="width: 280px; height: 100%;">
                 <div class="card border-0 shadow-sm w-100">
                     <div class="card-header bg-dark text-white text-center fw-bold py-2 small">
-                        STUDENT FACE SCANNER
+                        <i class="bi bi-camera-video-fill"></i>
+
+                        Live AI Proctor
                     </div>
                     <div class="card-body p-2 text-center bg-light">
                         <div class="bg-black rounded border border-2 border-danger overflow-hidden mb-2" style="height: 180px; position: relative;">
                             <video id="proctor-webcam" autoplay playsinline muted class="w-100 h-100" style="object-fit: cover;"></video>
-                            <div class="badge bg-danger opacity-75" style="position: absolute; bottom: 5px; left: 5px; font-size: 10px;">LIVE SCANNER</div>
+                            <div class="badge bg-danger opacity-75" style="position: absolute; bottom: 5px; left: 5px; font-size: 10px;">LIVE</div>
                         </div>
-                        <small class="text-muted font-monospace d-block text-start" style="font-size: 11px;">
-                            • Hardware monitored frame loops<br />
-                            • Screen boundaries active lock<br />
-                            • Copy paste intercept handlers
-                        </small>
+                        <ul class="list-group list-group-flush">
+
+                            <li class="list-group-item">
+                                🟢 Camera Connected
+                            </li>
+
+                            <li class="list-group-item">
+                                🟢 Screen Monitoring
+                            </li>
+
+                            <li class="list-group-item">
+                                🟢 Clipboard Protected
+                            </li>
+
+                            <li class="list-group-item">
+                                🟢 Anti Cheat Active
+                            </li>
+
+                        </ul>
                     </div>
                 </div>
             </div>
@@ -93,6 +179,22 @@
     </div>
 
     <script>
+
+                let seconds = 1800;
+
+        setInterval(() => {
+
+        let m = Math.floor(seconds / 60);
+
+        let s = seconds % 60;
+
+        document.getElementById("timer").innerHTML =
+        `${m}:${s<10?'0':''}${s}`;
+
+        seconds--;
+
+        },1000);
+
         const sessionId = document.getElementById("exam-session-id").value;
         let isSubmitting = false;
 
@@ -183,6 +285,8 @@
             const form = document.getElementById("examForm");
             const formData = new FormData(form);
 
+            document.getElementById("progressBar").style.width="100%";
+
             fetch(form.action, {
                 method: 'POST',
                 body: formData
@@ -192,6 +296,19 @@
                 alert("Network connection error encountered during sheet serialization.");
                 isSubmitting = false;
             });
+        }
+
+                function selectOption(card) {
+
+            const parent = card.parentElement;
+
+            parent.querySelectorAll(".option-card").forEach(x => {
+                x.classList.remove("selected-option");
+            });
+
+            card.classList.add("selected-option");
+
+            card.querySelector("input").checked = true;
         }
     </script>
 </body>

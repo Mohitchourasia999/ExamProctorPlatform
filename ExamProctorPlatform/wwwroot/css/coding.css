@@ -1,0 +1,51 @@
+body {
+    background: #F5F7FB;
+}
+
+.coding-page {
+    min-height: 100vh;
+}
+
+.card {
+    border-radius: 18px;
+}
+
+.card-header {
+    font-weight: 600;
+    padding: 18px 22px;
+}
+
+#code-editor {
+    font-size: 16px;
+    border-radius: 0 0 18px 18px;
+}
+
+#ai-webcam {
+    border: 4px solid #2563EB;
+}
+
+.btn {
+    border-radius: 10px;
+    font-weight: 600;
+}
+
+#console-output {
+    min-height: 52px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: 600;
+}
+
+.alert {
+    border-radius: 12px;
+}
+
+.card {
+    transition: .25s;
+}
+
+    .card:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 12px 30px rgba(0,0,0,.08);
+    }

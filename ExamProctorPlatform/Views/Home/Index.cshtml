@@ -1,32 +1,215 @@
-﻿@* Views/Home/Index.cshtml *@
-@{
-    ViewData["Title"] = "Welcome to the Sandbox";
+﻿@{
+    ViewData["Title"] = "Home";
 }
 
-<div class="container mt-5 pt-5 text-center">
-    <div class="row justify-content-center">
-        <div class="col-md-8">
-            <div class="card shadow-lg border-0 rounded-4 overflow-hidden">
-                <div class="card-header bg-dark text-white py-4">
-                    <h1 class="display-5 fw-bold mb-0">🕵️ Welcome to the Sandbox</h1>
-                </div>
-                <div class="card-body p-5 bg-white">
-                    <p class="lead text-secondary fs-4 mb-4">
-                        The Illuminati are watching you. 👁️
-                    </p>
-                    <div class="alert alert-warning border-0 shadow-sm p-3 mb-4 font-monospace small">
-                        <strong>System Notice:</strong> Every blink, twitch, and secondary monitor lookup is being tracked by our omniscient telemetry engine. Act natural.
+<div class="hero-section">
+
+    <div class="container">
+
+        <div class="row align-items-center min-vh-100">
+
+            <!-- Left Side -->
+
+            <div class="col-lg-6">
+
+                <span class="hero-badge">
+
+                    <i class="bi bi-shield-check"></i>
+
+                    AI Powered Examination Platform
+
+                </span>
+
+                <h1 class="hero-title mt-4">
+
+                    Secure Online Exams
+
+                    <span class="text-primary">
+                        with AI Proctoring
+                    </span>
+
+                </h1>
+
+                <p class="hero-description mt-4">
+
+                    Conduct secure objective and coding examinations with
+                    live AI monitoring, browser protection, automatic
+                    evaluation and instant result generation.
+
+                </p>
+
+                <div class="row mt-5">
+
+                    <div class="col-6 mb-3">
+
+                        <div class="hero-feature">
+
+                            <i class="bi bi-camera-video-fill text-primary"></i>
+
+                            AI Face Detection
+
+                        </div>
+
                     </div>
-                    <hr class="my-4" />
-                    <div class="d-grid gap-3 d-sm-flex justify-content-sm-center">
-                        <a asp-controller="Account" asp-action="Login" class="btn btn-success btn-lg px-4 fw-bold">Enter Portal</a>
-                        <a asp-controller="Account" asp-action="Register" class="btn btn-outline-dark btn-lg px-4">Create Identity</a>
+
+                    <div class="col-6 mb-3">
+
+                        <div class="hero-feature">
+
+                            <i class="bi bi-laptop text-primary"></i>
+
+                            Coding Assessment
+
+                        </div>
+
                     </div>
+
+                    <div class="col-6 mb-3">
+
+                        <div class="hero-feature">
+
+                            <i class="bi bi-shield-lock-fill text-primary"></i>
+
+                            Browser Security
+
+                        </div>
+
+                    </div>
+
+                    <div class="col-6 mb-3">
+
+                        <div class="hero-feature">
+
+                            <i class="bi bi-graph-up-arrow text-primary"></i>
+
+                            Instant Results
+
+                        </div>
+
+                    </div>
+
                 </div>
-                <div class="card-footer bg-light text-muted py-3 small font-monospace">
-                    ExamProctorPlatform // Secure Testing Grid Active
+
+                <div class="mt-5">
+
+                    <a asp-controller="Account"
+                       asp-action="Register"
+                       class="btn btn-primary btn-lg rounded-pill px-5 me-3">
+
+                        Get Started
+
+                    </a>
+
+                    <a asp-controller="Account"
+                       asp-action="Login"
+                       class="btn btn-outline-primary btn-lg rounded-pill px-5">
+
+                        Login
+
+                    </a>
+
                 </div>
+
             </div>
+
+            <!-- Right Side -->
+
+            <div class="col-lg-6">
+
+                <div class="hero-image-card">
+
+                    <div class="hero-card-header">
+
+                        <div class="hero-dot bg-danger"></div>
+
+                        <div class="hero-dot bg-warning"></div>
+
+                        <div class="hero-dot bg-success"></div>
+
+                    </div>
+
+                    <div class="hero-card-body">
+
+                        <div class="dashboard-box">
+
+                            <i class="bi bi-camera-video-fill display-4 text-primary"></i>
+
+                            <h5 class="mt-3">
+
+                                AI Live Proctor
+
+                            </h5>
+
+                            <p class="text-muted">
+
+                                Real-time candidate monitoring
+
+                            </p>
+
+                        </div>
+
+                        <hr>
+
+                        <div class="row text-center">
+
+                            <div class="col-4">
+
+                                <h3 class="text-primary fw-bold">
+
+                                    99%
+
+                                </h3>
+
+                                <small>
+
+                                    Accuracy
+
+                                </small>
+
+                            </div>
+
+                            <div class="col-4">
+
+                                <h3 class="text-success fw-bold">
+
+                                    AI
+
+                                </h3>
+
+                                <small>
+
+                                    Monitoring
+
+                                </small>
+
+                            </div>
+
+                            <div class="col-4">
+
+                                <h3 class="text-warning fw-bold">
+
+                                    24x7
+
+                                </h3>
+
+                                <small>
+
+                                    Security
+
+                                </small>
+
+                            </div>
+
+                        </div>
+
+                    </div>
+
+                </div>
+
+            </div>
+
         </div>
+
     </div>
+
 </div>

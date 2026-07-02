@@ -1,28 +1,201 @@
 ﻿@{
-    ViewData["Title"] = "Test Suspended";
-    Layout = null; // Kill structural master navigation dashboard headers safely to freeze workspace visibility options
+    ViewData["Title"] = "Exam Terminated";
+    Layout = null;
 }
 
 <!DOCTYPE html>
-<html>
+
+<html lang="en">
+
 <head>
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css">
+
+    <meta charset="utf-8" />
+
+    <meta name="viewport"
+          content="width=device-width, initial-scale=1" />
+
     <title>Exam Terminated</title>
+
+    <link rel="stylesheet"
+          href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css">
+
+    <link rel="stylesheet"
+          href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
+
+    <style>
+
+        body {
+            background: #F5F7FB;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            margin: 0;
+        }
+
+        .blocked-card {
+            width: 700px;
+            border: none;
+            border-radius: 20px;
+            overflow: hidden;
+            box-shadow: 0 20px 45px rgba(0,0,0,.12);
+        }
+
+        .blocked-header {
+            background: #DC3545;
+            color: white;
+            padding: 35px;
+            text-align: center;
+        }
+
+        .blocked-icon {
+            font-size: 70px;
+        }
+
+        .info-box {
+            background: #F8F9FA;
+            border-left: 5px solid #DC3545;
+            border-radius: 10px;
+            padding: 18px;
+        }
+
+    </style>
+
 </head>
-<body class="bg-light">
-    <div class="container mt-5 pt-5 text-center">
-        <div class="card shadow border-danger mx-auto" style="max-width: 600px;">
-            <div class="card-header bg-danger text-white p-4">
-                <h1 class="display-6">🚫 ASSESSMENT ACCESS TERMINATED</h1>
-            </div>
-            <div class="card-body p-5">
-                <p class="lead text-dark font-weight-bold">Your exam profile session execution scope was instantly halted by automatic systems protection engine parameters rules filters.</p>
-                <div class="alert alert-secondary font-monospace my-4">Reason: Maximum Tab Window context switches limits exceeded criteria limit bounds (3/3 threshold breaches)</div>
-                <p class="text-muted">The precise telemetry monitoring metrics log indices values (copy attempts counts, visibility shifts events, external secondary track behaviors tracking values) have been permanently stored into database servers records grid context next to student identity flags parameters tracking schemas logs.</p>
-                <hr />
-                <p class="text-danger small font-italic font-weight-bold">Contact institutional server network administrators or proctor supervisor board to dispute security records flags parameters tracking indexes values.</p>
-            </div>
+
+<body>
+
+    <div class="card blocked-card">
+
+        <div class="blocked-header">
+
+            <i class="bi bi-shield-fill-x blocked-icon"></i>
+
+            <h2 class="mt-3">
+
+                Examination Terminated
+
+            </h2>
+
+            <p class="mb-0">
+
+                AI Proctor detected a policy violation.
+
+            </p>
+
         </div>
+
+        <div class="card-body p-5">
+
+            <div class="alert alert-danger">
+
+                <strong>
+
+                    Access Blocked
+
+                </strong>
+
+                Your examination has been automatically terminated because the allowed number of window switches was exceeded.
+
+            </div>
+
+            <div class="info-box mb-4">
+
+                <h5>
+
+                    <i class="bi bi-exclamation-triangle-fill text-danger"></i>
+
+                    Reason
+
+                </h5>
+
+                Maximum window/tab switch limit reached.
+
+                <br>
+
+                Allowed :
+
+                <strong>
+
+                    3
+
+                </strong>
+
+                <br>
+
+                Detected :
+
+                <strong>
+
+                    3+
+
+                </strong>
+
+            </div>
+
+            <div class="row text-center mb-4">
+
+                <div class="col-md-4">
+
+                    <i class="bi bi-window fs-1 text-danger"></i>
+
+                    <h6 class="mt-2">
+
+                        Window Switch
+
+                    </h6>
+
+                </div>
+
+                <div class="col-md-4">
+
+                    <i class="bi bi-clipboard-x fs-1 text-warning"></i>
+
+                    <h6 class="mt-2">
+
+                        Clipboard Monitor
+
+                    </h6>
+
+                </div>
+
+                <div class="col-md-4">
+
+                    <i class="bi bi-camera-video-fill fs-1 text-primary"></i>
+
+                    <h6 class="mt-2">
+
+                        AI Proctor
+
+                    </h6>
+
+                </div>
+
+            </div>
+
+            <div class="alert alert-secondary">
+
+                All examination events and security logs have been securely recorded for review by the administrator.
+
+            </div>
+
+            <div class="text-center mt-4">
+
+                <a href="/Account/Login"
+                   class="btn btn-primary btn-lg">
+
+                    <i class="bi bi-box-arrow-in-right"></i>
+
+                    Return to Login
+
+                </a>
+
+            </div>
+
+        </div>
+
     </div>
+
 </body>
+
 </html>

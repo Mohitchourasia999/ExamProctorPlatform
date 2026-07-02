@@ -3,7 +3,7 @@
 <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>@ViewData["Title"] - ExamProctorPlatform</title>
+    <title>@ViewData["Title"] - SandBox</title>
     <script type="importmap"></script>
     <link rel="stylesheet" href="~/lib/bootstrap/dist/css/bootstrap.min.css" />
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
@@ -21,7 +21,7 @@
 
                     <i class="bi bi-shield-check"></i>
 
-                    ExamProctor
+                    SandBox
 
                 </a>
 
@@ -39,29 +39,66 @@
                     <ul class="navbar-nav me-auto">
 
                         <li class="nav-item">
-
                             <a class="nav-link"
                                asp-controller="Home"
                                asp-action="Index">
-
+                                <i class="bi bi-house-door"></i>
                                 Home
-
                             </a>
-
                         </li>
-
-                    </ul>
-
-                    <div class="d-flex gap-2">
 
                         @if (User.Identity!.IsAuthenticated)
                         {
+                            @if (User.IsInRole("Student"))
+                            {
+                                <li class="nav-item">
+                                    <a class="nav-link"
+                                       asp-controller="Student"
+                                       asp-action="Index">
+                                        <i class="bi bi-journal-text"></i>
+                                        My Exams
+                                    </a>
+                                </li>
+                            }
+
+                            @if (User.IsInRole("Admin"))
+                            {
+                                <li class="nav-item">
+                                    <a class="nav-link"
+                                       asp-controller="Question"
+                                       asp-action="Index">
+                                        <i class="bi bi-database"></i>
+                                        Question Bank
+                                    </a>
+                                </li>
+
+                                <li class="nav-item">
+                                    <a class="nav-link"
+                                       asp-controller="Question"
+                                       asp-action="Index">
+                                        <i class="bi bi-bar-chart"></i>
+                                        Results
+                                    </a>
+                                </li>
+                            }
+                        }
+
+                    </ul>
+
+                    <div class="d-flex align-items-center gap-3">
+
+                        @if (User.Identity!.IsAuthenticated)
+                        {
+                            <span class="fw-semibold text-primary">
+                                <i class="bi bi-person-circle"></i>
+                                @User.Identity.Name
+                            </span>
+
                             <a asp-controller="Account"
                                asp-action="Logout"
                                class="btn btn-outline-danger">
-
+                                <i class="bi bi-box-arrow-right"></i>
                                 Logout
-
                             </a>
                         }
                         else
@@ -69,17 +106,13 @@
                             <a asp-controller="Account"
                                asp-action="Login"
                                class="btn btn-outline-primary">
-
                                 Login
-
                             </a>
 
                             <a asp-controller="Account"
                                asp-action="Register"
                                class="btn btn-primary">
-
                                 Register
-
                             </a>
                         }
 
@@ -100,7 +133,7 @@
 
     <footer class="border-top footer text-muted">
         <div class="container">
-            &copy; 2026 - ExamProctorPlatform - <a asp-area="" asp-controller="Home" asp-action="Privacy">Privacy</a>
+            &copy; 2026 - SandBox - <a asp-area="" asp-controller="Home" asp-action="Privacy">Privacy</a>
         </div>
     </footer>
     <script src="~/lib/jquery/dist/jquery.min.js"></script>

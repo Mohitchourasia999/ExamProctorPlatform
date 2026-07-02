@@ -19,14 +19,13 @@ namespace ExamProctorPlatform.Controllers
         }
 
         [HttpGet]
-        public async Task<IActionResult> Register()
+        public IActionResult Register()
         {
-            // If a logged-in user leaves their dashboard to come here, log them out instantly
             if (User.Identity != null && User.Identity.IsAuthenticated)
             {
-                await HttpContext.SignOutAsync("CookieAuth");
-                return RedirectToAction("Register");
+                return RedirectToAction("Index", "Home");
             }
+
             return View();
         }
 
@@ -42,41 +41,68 @@ namespace ExamProctorPlatform.Controllers
                 user.CdacPercentage = 0.0;
             }
 
+            if (_context.Users.Any(u => u.Email == user.Email))
+            {
+                ViewBag.Error = "An account with this email already exists.";
+                return View(user);
+            }
+
+            if (!ModelState.IsValid)
+            {
+                return View(user);
+            }
+
             _context.Users.Add(user);
             _context.SaveChanges();
+
             return RedirectToAction("Login");
         }
 
         [HttpGet]
-        public async Task<IActionResult> Login()
+        public IActionResult Login()
         {
-            // Force logout immediately if an authenticated user accesses the login screen
             if (User.Identity != null && User.Identity.IsAuthenticated)
             {
-                await HttpContext.SignOutAsync("CookieAuth");
-                return RedirectToAction("Login");
+                return RedirectToAction("Index", "Home");
             }
+
             return View();
         }
 
         [HttpPost]
         public async Task<IActionResult> Login(string email, string password)
         {
-            var user = _context.Users.FirstOrDefault(u => u.Email == email && u.PasswordHash == password);
+            var user = _context.Users
+                .FirstOrDefault(u => u.Email == email && u.PasswordHash == password);
+
             if (user != null)
             {
-                var claims = new List<Claim>
-                {
-                    new Claim(ClaimTypes.Name, user.Name),
-                    new Claim(ClaimTypes.Email, user.Email),
-                    new Claim(ClaimTypes.Role, user.Role),
-                    new Claim("UserId", user.Id.ToString())
-                };
-                var identity = new ClaimsIdentity(claims, "CookieAuth");
-                await HttpContext.SignInAsync("CookieAuth", new ClaimsPrincipal(identity));
+                // Get current server instance ID
+                var serverId = HttpContext.RequestServices.GetRequiredService<string>();
 
-                return user.Role == "Admin" ? RedirectToAction("Index", "Question") : RedirectToAction("Index", "Student");
+                var claims = new List<Claim>
+        {
+            new Claim(ClaimTypes.Name, user.Name),
+            new Claim(ClaimTypes.Email, user.Email),
+            new Claim(ClaimTypes.Role, user.Role),
+            new Claim("UserId", user.Id.ToString()),
+
+            // Used to invalidate login after server restart
+            new Claim("ServerInstanceId", serverId)
+        };
+
+                var identity = new ClaimsIdentity(claims, "CookieAuth");
+
+                await HttpContext.SignInAsync(
+                    "CookieAuth",
+                    new ClaimsPrincipal(identity));
+
+                if (user.Role == "Admin")
+                    return RedirectToAction("Index", "Question");
+
+                return RedirectToAction("Index", "Student");
             }
+
             ViewBag.Error = "Invalid credentials.";
             return View();
         }

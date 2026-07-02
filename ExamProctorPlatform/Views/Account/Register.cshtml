@@ -24,6 +24,13 @@
 
         </div>
 
+        @if (ViewBag.Error != null)
+        {
+            <div class="alert alert-danger">
+                @ViewBag.Error
+            </div>
+        }
+
         <form asp-action="Register" method="post">
 
             <div class="mb-3">
@@ -51,6 +58,8 @@
                        placeholder="Enter your email"
                        required />
 
+                <span asp-validation-for="Email" class="text-danger"></span>
+
             </div>
 
             <div class="mb-3">
@@ -64,6 +73,9 @@
                        class="form-control form-control-lg"
                        placeholder="Create a password"
                        required />
+                <span asp-validation-for="PasswordHash"
+                      class="text-danger">
+                </span>
 
             </div>
 

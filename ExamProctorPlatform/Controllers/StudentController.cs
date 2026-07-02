@@ -115,6 +115,86 @@ namespace ExamProctorPlatform.Controllers
             ViewBag.SessionId = session.Id;
 
             return View("TakeExam", questions);
+
+        }
+
+        [HttpPost]
+        public IActionResult SubmitExam(int sessionId)
+        {
+            var session = _context.ExamSessions
+                .FirstOrDefault(s => s.Id == sessionId);
+
+            if (session == null)
+                return NotFound();
+
+            if (session.Status == "Completed")
+                return BadRequest("Exam already submitted.");
+
+            int totalScore = 0;
+
+            var questions = _context.Questions
+                .Where(q => q.Subject == session.Subject)
+                .ToList();
+
+            foreach (var question in questions)
+            {
+                string answer =
+                    Request.Form[$"question_{question.Id}"];
+
+                var studentAnswer = new StudentAnswer
+                {
+                    ExamSessionId = session.Id,
+                    QuestionId = question.Id,
+                    StudentAnswerText = answer ?? ""
+                };
+
+                if (question.QuestionType == "Option")
+                {
+                    if (!string.IsNullOrWhiteSpace(answer))
+                    {
+                        if (answer.Trim()
+                            .Equals(question.CorrectAnswer.Trim(),
+                            StringComparison.OrdinalIgnoreCase))
+                        {
+                            totalScore += question.PositiveMarks;
+
+                            studentAnswer.IsCorrect = true;
+                            studentAnswer.MarksAwarded = question.PositiveMarks;
+                        }
+                        else
+                        {
+                            totalScore += question.NegativeMarks;
+
+                            studentAnswer.IsCorrect = false;
+                            studentAnswer.MarksAwarded = question.NegativeMarks;
+                        }
+                    }
+                    else
+                    {
+                        studentAnswer.IsCorrect = false;
+                        studentAnswer.MarksAwarded = 0;
+                    }
+                }
+                else
+                {
+                    // Written questions
+                    studentAnswer.IsCorrect = false;
+                    studentAnswer.MarksAwarded = 0;
+                }
+
+                _context.StudentAnswers.Add(studentAnswer);
+            }
+
+            session.Score = totalScore;
+            session.Status = "Completed";
+
+            _context.SaveChanges();
+
+            return Json(new
+            {
+                success = true,
+                score = totalScore
+            });
         }
 
         // Test auto termination error layout route

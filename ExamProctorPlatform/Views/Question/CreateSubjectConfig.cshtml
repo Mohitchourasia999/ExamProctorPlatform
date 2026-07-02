@@ -259,36 +259,28 @@
 
     class="mt-4">
 
-    <input
-
+        <input
+    type="text"
     class="form-control mb-2 opt-val-${index}"
-
     placeholder="Option A"
-
     required>
 
     <input
-
+    type="text"
     class="form-control mb-2 opt-val-${index}"
-
     placeholder="Option B"
-
     required>
 
     <input
-
+    type="text"
     class="form-control mb-2 opt-val-${index}"
-
     placeholder="Option C"
-
     required>
 
     <input
-
+    type="text"
     class="form-control mb-3 opt-val-${index}"
-
     placeholder="Option D"
-
     required>
 
     <input
@@ -331,27 +323,35 @@
 
     }
 
-    function toggleOptionPanelLayoutVisibility(dropdown,index){
+        function toggleOptionPanelLayoutVisibility(dropdown, index) {
 
-    const panel=document.getElementById(`mcq_panel_index_${index}`);
+        const panel = document.getElementById(`mcq_panel_index_${index}`);
 
-    const inputs=panel.querySelectorAll("input[type='text']");
+        const inputs = panel.querySelectorAll(".opt-val-" + index);
 
-    if(dropdown.value==="Written"){
+        if (dropdown.value === "Written") {
 
-    panel.style.display="none";
+            panel.style.display = "none";
 
-    inputs.forEach(x=>x.removeAttribute("required"));
+            inputs.forEach(input => {
 
-    }
+                input.required = false;
+                input.value = "";
 
-    else{
+            });
 
-    panel.style.display="block";
+        }
+        else {
 
-    inputs.forEach(x=>x.setAttribute("required","required"));
+            panel.style.display = "block";
 
-    }
+            inputs.forEach(input => {
+
+                input.required = true;
+
+            });
+
+        }
 
     }
 
@@ -369,17 +369,23 @@
 
     const panel=document.getElementById(`mcq_panel_index_${i}`);
 
-    if(panel.style.display!=="none"){
+        if(panel.style.display !== "none"){
 
-    let options=[];
+        let options=[];
 
-    panel.querySelectorAll(`.opt-val-${i}`).forEach(x=>{
+        panel.querySelectorAll(`.opt-val-${i}`).forEach(x=>{
 
-    if(x.value.trim()!="") options.push(x.value.trim());
+            if(x.value.trim()!="")
+                options.push(x.value.trim());
 
-    });
+        });
 
-    hidden.value=JSON.stringify(options);
+        hidden.value = JSON.stringify(options);
+
+    }
+    else{
+
+        hidden.value = "";
 
     }
 

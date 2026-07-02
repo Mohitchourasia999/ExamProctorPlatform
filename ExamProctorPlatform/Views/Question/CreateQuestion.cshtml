@@ -1,0 +1,595 @@
+﻿@model ExamProctorPlatform.Models.Question
+
+@{
+    ViewData["Title"] = "Create Question";
+}
+
+<div class="container py-5">
+
+    <div class="row justify-content-center">
+
+        <div class="col-lg-8">
+
+            <div class="card shadow border-0">
+
+                <div class="card-header bg-success text-white">
+
+                    <h3 class="mb-0">
+
+                        <i class="bi bi-plus-circle-fill"></i>
+
+                        Add New Question
+
+                    </h3>
+
+                </div>
+
+                <div class="card-body">
+
+                    <form asp-action="CreateQuestion" method="post">
+
+                        <input asp-for="Subject" type="hidden" />
+
+                        <!-- Question -->
+
+                        <div class="mb-4">
+
+                            <label class="form-label fw-bold">
+
+                                Question
+
+                            </label>
+
+                            <textarea asp-for="QuestionText"
+                                      rows="3"
+                                      class="form-control"
+                                      placeholder="Enter question..."
+                                      required></textarea>
+
+                        </div>
+
+                        <!-- Question Type -->
+
+                        <div class="mb-4">
+
+                            <label class="form-label fw-bold">
+
+                                Question Type
+
+                            </label>
+
+                            <select asp-for="QuestionType"
+                                    id="questionType"
+                                    class="form-select">
+
+                                <option value="Option">
+
+                                    Multiple Choice (MCQ)
+
+                                </option>
+
+                                <option value="Written">
+
+                                    Written
+
+                                </option>
+
+                            </select>
+
+                        </div>
+
+                        <!-- Options Section -->
+
+                        <div id="optionsSection" class="mb-4">
+
+                            <div class="d-flex justify-content-between align-items-center mb-3">
+
+                                <label class="form-label fw-bold mb-0">
+
+                                    Options
+
+                                </label>
+
+                                <button type="button"
+                                        class="btn btn-outline-primary btn-sm"
+                                        id="addOptionButton">
+
+                                    <i class="bi bi-plus-circle"></i>
+
+                                    Add Option
+
+                                </button>
+
+                            </div>
+
+                            <div id="optionsContainer">
+                            </div>
+
+                        </div
+
+                        if (questionType.value === "Option") {
+
+    const filledOptions = [];
+
+    document.querySelectorAll(".option-input").forEach(input => {
+
+        if (input.value.trim() !== "") {
+            filledOptions.push(input.value.trim());
+        }
+
+    });
+
+    if (filledOptions.length < 2) {
+
+        alert("Please enter at least two options.");
+
+        event.preventDefault();
+        return;
+
+    }
+
+    if (correctAnswerDropdown.value === "") {
+
+        alert("Please select the correct answer.");
+
+        event.preventDefault();
+        return;
+
+    }
+
+}
+
+                        <input asp-for="OptionsJson"
+                               id="OptionsJson"
+                               type="hidden" />
+
+                        <!-- MCQ Correct Answer -->
+
+                        <div id="mcqAnswerSection"
+                             class="mb-4">
+
+                            <label class="form-label fw-bold">
+
+                                Correct Answer
+
+                            </label>
+
+                            <select asp-for="CorrectAnswer"
+                                    id="correctAnswer"
+                                    class="form-select"
+                            required>
+
+                                <option value="">
+
+                                    Select Correct Answer
+
+                                </option>
+
+                            </select>
+
+                        </div>
+
+                        <!-- Written Correct Answer -->
+
+                        <div id="writtenAnswerSection"
+                             class="mb-4"
+                             style="display:none;">
+
+                            <label class="form-label fw-bold">
+
+                                Expected Answer
+
+                            </label>
+
+                            <input asp-for="CorrectAnswer"
+                                   type="text"
+                                   id="writtenAnswer"
+                                   class="form-control"
+                                   placeholder="Enter expected answer..." />
+
+                        </div>
+
+                        <!-- Marks -->
+
+                        <div class="row">
+
+                            <div class="col-md-6">
+
+                                <label class="form-label fw-bold">
+
+                                    Positive Marks
+
+                                </label>
+
+                                <input asp-for="PositiveMarks"
+                                       type="number"
+                                       class="form-control"
+                                       value="4"
+                                       required />
+
+                            </div>
+
+                            <div class="col-md-6">
+
+                                <label class="form-label fw-bold">
+
+                                    Negative Marks
+
+                                </label>
+
+                                <input asp-for="NegativeMarks"
+                                       id="negativeMarks"
+                                       type="number"
+                                       class="form-control"
+                                       value="-1"
+                                       required />
+
+                            </div>
+
+                        </div>
+
+                        <!-- Buttons -->
+
+                        <div class="d-flex justify-content-between mt-5">
+
+                            <a asp-action="ViewQuestions"
+                               asp-route-subjectName="@Model.Subject"
+                               class="btn btn-secondary">
+
+                                <i class="bi bi-arrow-left"></i>
+
+                                Back
+
+                            </a>
+
+                            <button type="submit"
+                                    class="btn btn-success">
+
+                                <i class="bi bi-check-circle-fill"></i>
+
+                                Save Question
+
+                            </button>
+
+                        </div>
+
+                    </form>
+
+                </div>
+
+            </div>
+
+        </div>
+
+    </div>
+
+</div>
+
+<script>
+
+    let optionCount = 0;
+
+    const optionsContainer = document.getElementById("optionsContainer");
+    const addOptionButton = document.getElementById("addOptionButton");
+
+    const questionType = document.getElementById("questionType");
+
+    const optionsSection = document.getElementById("optionsSection");
+    const mcqAnswerSection = document.getElementById("mcqAnswerSection");
+    const writtenAnswerSection = document.getElementById("writtenAnswerSection");
+
+    const correctAnswerDropdown = document.getElementById("correctAnswer");
+    const writtenAnswer = document.getElementById("writtenAnswer");
+
+    const negativeMarks = document.getElementById("negativeMarks");
+
+    const hiddenJson = document.getElementById("OptionsJson");
+
+    const MAX_OPTIONS = 8;
+    const MIN_OPTIONS = 2;
+
+    function addOption(value = "") {
+
+        if (optionCount >= MAX_OPTIONS)
+            return;
+
+        optionCount++;
+
+        const row = document.createElement("div");
+
+        row.className = "input-group mb-2 option-row";
+
+        row.innerHTML = `
+
+            <input
+                type="text"
+                class="form-control option-input"
+                placeholder="Option ${optionCount}"
+                value="${value}"
+                >
+
+            <button
+                type="button"
+                class="btn btn-outline-danger remove-option">
+
+                <i class="bi bi-trash"></i>
+
+            </button>
+
+        `;
+
+        optionsContainer.appendChild(row);
+
+        row.querySelector(".option-input")
+            .addEventListener("input", refreshCorrectAnswerDropdown);
+
+        row.querySelector(".remove-option")
+            .addEventListener("click", function () {
+
+                removeOption(row);
+
+            });
+
+        refreshCorrectAnswerDropdown();
+
+        renumberOptions();
+
+        updateButtons();
+
+    }
+
+    function removeOption(row) {
+
+        if (document.querySelectorAll(".option-row").length <= MIN_OPTIONS) {
+
+            alert("At least 2 options are required.");
+
+            return;
+
+        }
+
+        row.remove();
+
+        optionCount--;
+
+        renumberOptions();
+
+        refreshCorrectAnswerDropdown();
+
+        updateButtons();
+
+    }
+
+    function renumberOptions() {
+
+        optionCount = 0;
+
+        document.querySelectorAll(".option-input").forEach(input => {
+
+            optionCount++;
+
+            input.placeholder = "Option " + optionCount;
+
+        });
+
+    }
+
+    function updateButtons() {
+
+        addOptionButton.disabled =
+            optionCount >= MAX_OPTIONS;
+
+        document.querySelectorAll(".remove-option")
+            .forEach(btn => {
+
+                btn.disabled =
+                    optionCount <= MIN_OPTIONS;
+
+            });
+
+    }
+
+    function refreshCorrectAnswerDropdown() {
+
+        const previous = correctAnswerDropdown.value;
+
+        correctAnswerDropdown.innerHTML =
+            '<option value="">Select Correct Answer</option>';
+
+        document.querySelectorAll(".option-input")
+            .forEach(input => {
+
+                if (input.value.trim() !== "") {
+
+                    const option = document.createElement("option");
+
+                    option.value = input.value.trim();
+
+                    option.text = input.value.trim();
+
+                    correctAnswerDropdown.appendChild(option);
+
+                }
+
+            });
+
+        correctAnswerDropdown.value = previous;
+
+    }
+
+            function toggleQuestionType() {
+
+        const optionInputs = document.querySelectorAll(".option-input");
+
+        if (questionType.value === "Written") {
+
+            optionsSection.style.display = "none";
+            mcqAnswerSection.style.display = "none";
+            writtenAnswerSection.style.display = "block";
+
+            negativeMarks.value = 0;
+
+            optionInputs.forEach(x => x.removeAttribute("required"));
+            correctAnswerDropdown.removeAttribute("required");
+
+            writtenAnswer.setAttribute("required", "required");
+        }
+        else {
+
+            optionsSection.style.display = "block";
+            mcqAnswerSection.style.display = "block";
+            writtenAnswerSection.style.display = "none";
+
+            negativeMarks.value = -1;
+
+                // Don't use HTML required on dynamic option inputs
+    optionInputs.forEach(x => x.removeAttribute("required"));
+
+    // Only the correct answer dropdown should remain required
+    correctAnswerDropdown.setAttribute("required", "required");
+
+            writtenAnswer.removeAttribute("required");
+        }
+    }
+
+    /* Default 4 options */
+
+    addOption();
+
+    addOption();
+
+    addOption();
+
+    addOption();
+
+    toggleQuestionType();
+
+
+    document.querySelector("form").addEventListener("submit", function (e) {
+
+        // Question validation
+        const question = document.querySelector("[name='QuestionText']");
+
+        if (question.value.trim() === "") {
+
+            alert("Please enter the question.");
+
+            question.focus();
+
+            e.preventDefault();
+
+            return;
+
+        }
+
+        // Positive marks validation
+        if (parseFloat(document.querySelector("[name='PositiveMarks']").value) <= 0) {
+
+            alert("Positive marks must be greater than 0.");
+
+            e.preventDefault();
+
+            return;
+
+        }
+
+        if (questionType.value === "Option") {
+
+            let options = [];
+
+            let hasEmptyOption = false;
+
+            document.querySelectorAll(".option-input").forEach(input => {
+
+                const value = input.value.trim();
+
+                if (value === "") {
+
+                    hasEmptyOption = true;
+
+                }
+                else {
+
+                    options.push(value);
+
+                }
+
+            });
+
+            if (hasEmptyOption) {
+
+                alert("Please fill all option fields.");
+
+                e.preventDefault();
+
+                return;
+
+            }
+
+            if (options.length < MIN_OPTIONS) {
+
+                alert("At least 2 options are required.");
+
+                e.preventDefault();
+
+                return;
+
+            }
+
+            // Prevent duplicate options
+            const uniqueOptions = [...new Set(options)];
+
+            if (uniqueOptions.length !== options.length) {
+
+                alert("Duplicate options are not allowed.");
+
+                e.preventDefault();
+
+                return;
+
+            }
+
+            if (correctAnswerDropdown.value === "") {
+
+                alert("Please select the correct answer.");
+
+                correctAnswerDropdown.focus();
+
+                e.preventDefault();
+
+                return;
+
+            }
+
+            hiddenJson.value = JSON.stringify(options);
+
+        }
+        else {
+
+            const answer = writtenAnswer.value.trim();
+
+            if (answer === "") {
+
+                alert("Please enter the expected answer.");
+
+                writtenAnswer.focus();
+
+                e.preventDefault();
+
+                return;
+
+            }
+
+            hiddenJson.value = "";
+
+        }
+
+    });
+
+    refreshCorrectAnswerDropdown();
+
+    updateButtons();
+
+    toggleQuestionType();
+
+            </script>

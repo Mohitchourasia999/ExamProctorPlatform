@@ -1,0 +1,198 @@
+﻿@model IEnumerable<ExamProctorPlatform.Models.Question>
+
+@{
+    ViewData["Title"] = "Secure Examination Window Framework";
+    Layout = null;
+}
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <link rel="stylesheet" href="~/lib/bootstrap/dist/css/bootstrap.min.css" />
+    <title>Live Security Examination</title>
+</head>
+<body class="bg-light" style="user-select: none; -webkit-user-select: none; overflow: hidden;" oncontextmenu="return false;">
+
+    <input type="hidden" id="exam-session-id" value="@ViewBag.SessionId" />
+
+    <div class="container-fluid vh-100 d-flex flex-column p-0" style="position: absolute; top: 0; left: 0; right: 0; bottom: 0;">
+
+        <div class="bg-white p-3 shadow-sm border-bottom border-danger border-4 d-flex justify-content-between align-items-center flex-shrink-0">
+            <div>
+                <h4 class="text-dark mb-0 fw-bold">Live Examination Panel: @ViewBag.Subject</h4>
+                <span class="badge bg-danger font-monospace">🔴 SECURE ACTIVE DISCOVERY TUNNEL PROCTOR ONLINE</span>
+            </div>
+            <div class="fs-4 fw-bold text-danger bg-light px-4 py-2 rounded border border-danger-subtle shadow-sm">⚠️ DO NOT SWITCH WINDOWS</div>
+        </div>
+
+        <div class="d-flex flex-grow-1 overflow-hidden w-100">
+
+            <div class="flex-grow-1 overflow-auto p-4" style="height: 100%;">
+                <form id="examForm" asp-action="SubmitExam" method="post" onsubmit="handleFormSubmit(event)">
+                    <input type="hidden" name="sessionId" value="@ViewBag.SessionId" />
+
+                    @foreach (var q in Model)
+                    {
+                        <div class="card shadow-sm border-0 mb-4 rounded-3 overflow-hidden">
+                            <div class="card-header bg-dark text-white py-3 d-flex justify-content-between align-items-center">
+                                <span><strong>Question ID: #@q.Id</strong></span>
+                                <span class="badge bg-info">Positive: +@q.PositiveMarks / Penalty: @q.NegativeMarks</span>
+                            </div>
+                            <div class="card-body p-4 bg-white">
+                                <p class="fs-5 text-dark mb-4 fw-semibold">@q.QuestionText</p>
+
+                                <div class="options-container">
+                                    @if (q.QuestionType == "Option" && q.Options != null && q.Options.Any())
+                                    {
+                                        @foreach (var option in q.Options)
+                                        {
+                                            <div class="form-check p-3 mb-2 rounded border border-light-subtle layout-option-node" style="cursor: pointer;">
+                                                <input class="form-check-input ms-1" type="radio" name="question_@q.Id" value="@option">
+                                                <label class="form-check-label ms-3 text-dark fw-medium">@option</label>
+                                            </div>
+                                        }
+                                        <button type="button" class="btn btn-sm btn-outline-secondary mt-2 font-monospace" onclick="clearSelection('question_@q.Id')">🧹 Clear Option Selection</button>
+                                    }
+                                    else
+                                    {
+                                        <textarea name="question_@q.Id" class="form-control anti-paste-field" rows="3" placeholder="Type answer text input key natively using keyboard keys..."></textarea>
+                                    }
+                                </div>
+                            </div>
+                        </div>
+                    }
+
+                    <div class="text-center my-5">
+                        <button type="submit" class="btn btn-danger btn-lg px-5 py-3 shadow fw-bold">Finalize Assessment Submission</button>
+                    </div>
+                </form>
+            </div>
+
+            <div class="bg-white border-start p-3 d-flex flex-column align-items-center flex-shrink-0" style="width: 280px; height: 100%;">
+                <div class="card border-0 shadow-sm w-100">
+                    <div class="card-header bg-dark text-white text-center fw-bold py-2 small">
+                        STUDENT FACE SCANNER
+                    </div>
+                    <div class="card-body p-2 text-center bg-light">
+                        <div class="bg-black rounded border border-2 border-danger overflow-hidden mb-2" style="height: 180px; position: relative;">
+                            <video id="proctor-webcam" autoplay playsinline muted class="w-100 h-100" style="object-fit: cover;"></video>
+                            <div class="badge bg-danger opacity-75" style="position: absolute; bottom: 5px; left: 5px; font-size: 10px;">LIVE SCANNER</div>
+                        </div>
+                        <small class="text-muted font-monospace d-block text-start" style="font-size: 11px;">
+                            • Hardware monitored frame loops<br />
+                            • Screen boundaries active lock<br />
+                            • Copy paste intercept handlers
+                        </small>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+    </div>
+
+    <script>
+        const sessionId = document.getElementById("exam-session-id").value;
+        let isSubmitting = false;
+
+        // Clear active selection choice from radio arrays
+        function clearSelection(radioName) {
+            document.querySelectorAll(`input[name='${radioName}']`).forEach(radio => {
+                radio.checked = false;
+            });
+        }
+
+        // Centrally processes context anomalies and focus boundary changes
+        function syncViolation(type) {
+            if (isSubmitting) return;
+
+            fetch(`/api/proctor/log-violation?type=${type}&sessionId=${sessionId}`, { method: 'POST' })
+            .then(res => res.json())
+            .then(data => {
+                if(data.status === "Blocked_By_Violation") {
+                    isSubmitting = true;
+                    window.location.href = "/Student/Terminated";
+                }
+            });
+        }
+
+        // Force constraints and query hardware stream hooks on component ready configurations
+        window.addEventListener('DOMContentLoaded', () => {
+            enforceWindowCage();
+
+            if (navigator.mediaDevices && navigator.mediaDevices.getUserMedia) {
+                navigator.mediaDevices.getUserMedia({ video: true })
+                .then(function (stream) {
+                    const videoElement = document.getElementById('proctor-webcam');
+                    if (videoElement) { videoElement.srcObject = stream; }
+                })
+                .catch(function (error) {
+                    alert("🚨 Hardware Access Denied: Camera permission is strictly mandatory.");
+                    window.close();
+                });
+            }
+        });
+
+        // Snaps display dimensions strictly back to maximum monitor limits
+        function enforceWindowCage() {
+            if (isSubmitting) return;
+            window.moveTo(0, 0);
+            window.resizeTo(window.screen.availWidth, window.screen.availHeight);
+        }
+
+        // Catch attempts to shrink or split window layouts
+        window.addEventListener('resize', () => {
+            if (!isSubmitting) {
+                syncViolation("TabSwitch");
+                enforceWindowCage();
+            }
+        });
+
+        // Check loop targeting attempts to slide the application frame away from origin coordinate limits
+        setInterval(() => {
+            if ((window.screenX > 0 || window.screenY > 0) && !isSubmitting) {
+                syncViolation("TabSwitch");
+                enforceWindowCage();
+            }
+        }, 500);
+
+        // Capture context shifts to back overlays, secondary apps, or alternative displays
+        window.addEventListener('blur', () => {
+            syncViolation("TabSwitch");
+        });
+
+        // Secondary layer check monitoring native tab index switches
+        document.addEventListener('visibilitychange', () => {
+            if (document.hidden) { syncViolation("TabSwitch"); }
+        });
+
+        // Block native text system copy calls
+        document.addEventListener('copy', (e) => e.preventDefault());
+
+        // Disallow external textual pasting across fields
+        document.querySelectorAll('.anti-paste-field').forEach(el => {
+            el.addEventListener('paste', (e) => e.preventDefault());
+        });
+
+        // Safely submits data layout strings and closes popup window cleanly
+        function handleFormSubmit(event) {
+            event.preventDefault();
+            isSubmitting = true;
+
+            const form = document.getElementById("examForm");
+            const formData = new FormData(form);
+
+            fetch(form.action, {
+                method: 'POST',
+                body: formData
+            }).then(response => {
+                window.close();
+            }).catch(err => {
+                alert("Network connection error encountered during sheet serialization.");
+                isSubmitting = false;
+            });
+        }
+    </script>
+</body>
+</html>

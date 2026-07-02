@@ -14,17 +14,22 @@ namespace ExamProctorPlatform.Controllers
             _context = context;
         }
 
+        // Increments the window violation counter from the exam popup window
         [HttpPost("log-violation")]
         public IActionResult LogViolation(string type, int sessionId)
         {
             var session = _context.ExamSessions.Find(sessionId);
-            if (session == null) return NotFound("Session invalid tracking state");
+            if (session == null)
+            {
+                return NotFound("Invalid test session identifier.");
+            }
 
-            if (type == "TabSwitch") session.TabSwitches += 1;
-            if (type == "MouseLeak") session.MouseLeaks += 1;
-            if (type == "CopyAttempt") session.CopyAttempts += 1;
+            if (type == "TabSwitch")
+            {
+                session.TabSwitches += 1;
+            }
 
-            // Strict policy rule validation parameter tracking
+            // Lock out student if they exceed 3 window switches
             if (session.TabSwitches >= 3)
             {
                 session.Status = "Blocked_By_Violation";

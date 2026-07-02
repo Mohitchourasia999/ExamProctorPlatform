@@ -1,4 +1,7 @@
-﻿using System.Security.Claims;
+﻿using System;
+using System.Linq;
+using System.Threading.Tasks;
+using System.Security.Claims;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Mvc;
 using ExamProctorPlatform.Data;
@@ -15,43 +18,53 @@ namespace ExamProctorPlatform.Controllers
             _context = context;
         }
 
-        // 1. GET: Register Page
         [HttpGet]
-        public IActionResult Register()
+        public async Task<IActionResult> Register()
         {
+            // If a logged-in user leaves their dashboard to come here, log them out instantly
+            if (User.Identity != null && User.Identity.IsAuthenticated)
+            {
+                await HttpContext.SignOutAsync("CookieAuth");
+                return RedirectToAction("Register");
+            }
             return View();
         }
 
-        // 2. POST: Register Submit
         [HttpPost]
-        public IActionResult Register(User user)
+        public IActionResult Register(User user, double? studentPercentage)
         {
-            if (ModelState.IsValid)
+            if (user.Role == "Student")
             {
-                // Abhi bilkul simple raw storage rakh rahe hain testing aasan karne ke liye
-                _context.Users.Add(user);
-                _context.SaveChanges();
+                user.CdacPercentage = studentPercentage ?? 0.0;
+            }
+            else
+            {
+                user.CdacPercentage = 0.0;
+            }
+
+            _context.Users.Add(user);
+            _context.SaveChanges();
+            return RedirectToAction("Login");
+        }
+
+        [HttpGet]
+        public async Task<IActionResult> Login()
+        {
+            // Force logout immediately if an authenticated user accesses the login screen
+            if (User.Identity != null && User.Identity.IsAuthenticated)
+            {
+                await HttpContext.SignOutAsync("CookieAuth");
                 return RedirectToAction("Login");
             }
-            return View(user);
-        }
-
-        // 3. GET: Login Page
-        [HttpGet]
-        public IActionResult Login()
-        {
             return View();
         }
 
-        // 4. POST: Login Submit (Role-Based Cookie Generation)
         [HttpPost]
         public async Task<IActionResult> Login(string email, string password)
         {
             var user = _context.Users.FirstOrDefault(u => u.Email == email && u.PasswordHash == password);
-
             if (user != null)
             {
-                // User ke details ka security ticket (Claims) banana
                 var claims = new List<Claim>
                 {
                     new Claim(ClaimTypes.Name, user.Name),
@@ -59,29 +72,15 @@ namespace ExamProctorPlatform.Controllers
                     new Claim(ClaimTypes.Role, user.Role),
                     new Claim("UserId", user.Id.ToString())
                 };
-
                 var identity = new ClaimsIdentity(claims, "CookieAuth");
-                var principal = new ClaimsPrincipal(identity);
+                await HttpContext.SignInAsync("CookieAuth", new ClaimsPrincipal(identity));
 
-                // Browser mein encrypted session cookie store karna
-                await HttpContext.SignInAsync("CookieAuth", principal);
-
-                // Role ke hisab se redirection rules
-                if (user.Role == "Admin")
-                {
-                    return RedirectToAction("Index", "Question"); // Admin Dashboard
-                }
-                else
-                {
-                    return RedirectToAction("Index", "Student"); // Student Exam Portal
-                }
+                return user.Role == "Admin" ? RedirectToAction("Index", "Question") : RedirectToAction("Index", "Student");
             }
-
-            ViewBag.Error = "Galat Email ya Password! Kripya sahi details dalein.";
+            ViewBag.Error = "Invalid credentials.";
             return View();
         }
 
-        // 5. Logout Action
         public async Task<IActionResult> Logout()
         {
             await HttpContext.SignOutAsync("CookieAuth");
@@ -89,10 +88,46 @@ namespace ExamProctorPlatform.Controllers
         }
 
         [HttpGet]
-        public IActionResult AccessDenied()
+        public IActionResult ForgotPassword() => View();
+
+        [HttpPost]
+        public IActionResult RequestResetOtp(string email)
         {
-            // Agar koi Student admin page kholne ki koshish karega toh ye badiya msg dikhayega
-            return Content("🚫 Access Denied: Aapke paas is page ko dekhne ki permission nahi hai. Kripya Admin account se login karein.");
+            var user = _context.Users.FirstOrDefault(u => u.Email == email && u.Role == "Admin");
+            if (user == null)
+            {
+                ViewBag.Error = "Admin account email not found.";
+                return View("ForgotPassword");
+            }
+
+            string generatedOtp = new Random().Next(100000, 999999).ToString();
+            user.ResetOtp = generatedOtp;
+            user.OtpExpiry = DateTime.Now.AddMinutes(10);
+            _context.SaveChanges();
+
+            ViewBag.Email = email;
+            ViewBag.Message = $"[SANDBOX RUNTIME SIMULATION] Security authorization code generated successfully: {generatedOtp}";
+
+            return View("VerifyOtp");
+        }
+
+        [HttpPost]
+        public IActionResult VerifyAndResetPassword(string email, string otp, string newPassword)
+        {
+            var user = _context.Users.FirstOrDefault(u => u.Email == email && u.ResetOtp == otp && u.Role == "Admin");
+            if (user == null || user.OtpExpiry < DateTime.Now)
+            {
+                ViewBag.Error = "Invalid verification OTP code or expiry window passed.";
+                ViewBag.Email = email;
+                return View("VerifyOtp");
+            }
+
+            user.PasswordHash = newPassword;
+            user.ResetOtp = null;
+            user.OtpExpiry = null;
+            _context.SaveChanges();
+
+            return RedirectToAction("Login");
         }
     }
 }

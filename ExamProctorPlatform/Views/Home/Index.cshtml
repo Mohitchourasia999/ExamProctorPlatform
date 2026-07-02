@@ -1,8 +1,32 @@
-﻿@{
-    ViewData["Title"] = "Home Page";
+﻿@* Views/Home/Index.cshtml *@
+@{
+    ViewData["Title"] = "Welcome to the Sandbox";
 }
 
-<div class="text-center">
-    <h1 class="display-4">Welcome</h1>
-    <p>Learn about <a href="https://learn.microsoft.com/aspnet/core">building Web apps with ASP.NET Core</a>.</p>
+<div class="container mt-5 pt-5 text-center">
+    <div class="row justify-content-center">
+        <div class="col-md-8">
+            <div class="card shadow-lg border-0 rounded-4 overflow-hidden">
+                <div class="card-header bg-dark text-white py-4">
+                    <h1 class="display-5 fw-bold mb-0">🕵️ Welcome to the Sandbox</h1>
+                </div>
+                <div class="card-body p-5 bg-white">
+                    <p class="lead text-secondary fs-4 mb-4">
+                        The Illuminati are watching you. 👁️
+                    </p>
+                    <div class="alert alert-warning border-0 shadow-sm p-3 mb-4 font-monospace small">
+                        <strong>System Notice:</strong> Every blink, twitch, and secondary monitor lookup is being tracked by our omniscient telemetry engine. Act natural.
+                    </div>
+                    <hr class="my-4" />
+                    <div class="d-grid gap-3 d-sm-flex justify-content-sm-center">
+                        <a asp-controller="Account" asp-action="Login" class="btn btn-success btn-lg px-4 fw-bold">Enter Portal</a>
+                        <a asp-controller="Account" asp-action="Register" class="btn btn-outline-dark btn-lg px-4">Create Identity</a>
+                    </div>
+                </div>
+                <div class="card-footer bg-light text-muted py-3 small font-monospace">
+                    ExamProctorPlatform // Secure Testing Grid Active
+                </div>
+            </div>
+        </div>
+    </div>
 </div>

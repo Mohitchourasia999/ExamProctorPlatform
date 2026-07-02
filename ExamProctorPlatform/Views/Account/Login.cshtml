@@ -1,32 +1,19 @@
 ﻿@{
     ViewData["Title"] = "Login";
 }
-
 <div class="row justify-content-center mt-5">
     <div class="col-md-4">
         <div class="card shadow">
-            <div class="card-header bg-success text-white text-center">
-                <h3>Secure Portal Login</h3>
-            </div>
+            <div class="card-header bg-success text-white text-center"><h3>Secure Portal Login</h3></div>
             <div class="card-body">
-                @if (ViewBag.Error != null)
-                {
-                    <div class="alert alert-danger text-center">@ViewBag.Error</div>
-                }
-
                 <form asp-action="Login" method="post">
-                    <div class="form-group mb-3">
-                        <label class="form-label">Registered Email</label>
-                        <input type="email" name="email" class="form-control" placeholder="name@domain.com" required />
-                    </div>
-                    <div class="form-group mb-4">
-                        <label class="form-label">Password</label>
-                        <input type="password" name="password" class="form-control" placeholder="Enter password" required />
-                    </div>
-                    <button type="submit" class="btn btn-success w-100 mb-2">Secure Login</button>
+                    <div class="mb-3"><label class="form-label">Email</label><input type="email" name="email" class="form-control" required /></div>
+                    <div class="mb-4"><label class="form-label">Password</label><input type="password" name="password" class="form-control" required /></div>
+                    <button type="submit" class="btn btn-success w-100 mb-3">Secure Login</button>
                 </form>
                 <div class="text-center">
-                    <a asp-action="Register" class="text-decoration-none">Don't have an account? Register here</a>
+                    <a asp-action="ForgotPassword" class="text-danger small d-block mb-2">Forgot Admin Password? Recover Profile</a>
+                    <a asp-action="Register" class="text-decoration-none small">Register Account</a>
                 </div>
             </div>
         </div>

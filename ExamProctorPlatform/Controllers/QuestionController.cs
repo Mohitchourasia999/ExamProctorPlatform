@@ -5,7 +5,7 @@ using ExamProctorPlatform.Models;
 
 namespace ExamProctorPlatform.Controllers
 {
-    [Authorize(Roles = "Admin")] // Strict security checkpoint
+    [Authorize(Roles = "Admin")]
     public class QuestionController : Controller
     {
         private readonly AppDbContext _context;
@@ -15,46 +15,52 @@ namespace ExamProctorPlatform.Controllers
             _context = context;
         }
 
-        // 1. READ: List all questions and show Telemetry Reports
         public IActionResult Index()
         {
-            var questions = _context.Questions.ToList();
-
-            // Student metrics and proctoring tracking list pass karna
-            ViewBag.Sessions = _context.ExamSessions.ToList();
-            return View(questions);
+            var configs = _context.SubjectConfigurations.ToList();
+            return View(configs);
         }
 
-        // 2. CREATE: Get Form Page
         [HttpGet]
-        public IActionResult Create()
+        public IActionResult CreateSubjectConfig()
         {
             return View();
         }
 
-        // 3. CREATE: Post Form Data Submission
+        // Processes the configuration record block and loops child items simultaneously
         [HttpPost]
-        public IActionResult Create(Question question)
+        public IActionResult CreateSubjectConfig(SubjectConfiguration config, List<Question> Questions)
         {
-            if (ModelState.IsValid)
+            if (_context.SubjectConfigurations.Any(c => c.SubjectName.ToLower() == config.SubjectName.ToLower()))
             {
-                _context.Questions.Add(question);
-                _context.SaveChanges();
-                return RedirectToAction("Index");
+                ModelState.AddModelError("", "This subject blueprint code already exists.");
+                return View(config);
             }
-            return View(question);
+
+            // 1. Commit primary blueprint metadata settings row properties
+            _context.SubjectConfigurations.Add(config);
+
+            // 2. Safely cycle and serialize nested child problem nodes
+            if (Questions != null && Questions.Any())
+            {
+                foreach (var q in Questions)
+                {
+                    if (!string.IsNullOrEmpty(q.QuestionText))
+                    {
+                        _context.Questions.Add(q);
+                    }
+                }
+            }
+
+            _context.SaveChanges();
+            return RedirectToAction("Index");
         }
 
-        // 4. DELETE: Remove Question from Bank
-        public IActionResult Delete(int id)
+        public IActionResult SubjectResults(string subjectName)
         {
-            var question = _context.Questions.Find(id);
-            if (question != null)
-            {
-                _context.Questions.Remove(question);
-                _context.SaveChanges();
-            }
-            return RedirectToAction("Index");
+            ViewBag.Subject = subjectName;
+            var sessions = _context.ExamSessions.Where(s => s.Subject == subjectName).ToList();
+            return View(sessions);
         }
     }
 }

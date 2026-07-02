@@ -1,0 +1,155 @@
+﻿@model ExamProctorPlatform.Models.SubjectConfiguration
+@{
+    ViewData["Title"] = "Create New Examination";
+}
+
+<div class="row justify-content-center mt-4">
+    <div class="col-md-8">
+        <div class="card shadow-lg border-0 rounded-4">
+            <div class="card-header bg-dark text-white p-4">
+                <h3 class="mb-0">📋 Create New Examination</h3>
+                <small class="text-white-50">Build your exam settings and add questions dynamically on a single page.</small>
+            </div>
+            <div class="card-body p-4 bg-light">
+                <form id="googleFormEngine" asp-action="CreateSubjectConfig" method="post">
+
+                    <div class="card border-0 shadow-sm p-4 mb-4 bg-white rounded-3">
+                        <h5 class="text-secondary border-bottom pb-2 mb-3">Core Exam Parameters</h5>
+                        <div class="mb-3">
+                            <label class="form-label fw-bold">Exam / Subject Name</label>
+                            <input asp-for="SubjectName" id="examSubjectName" class="form-control form-control-lg" placeholder="e.g., Java Advanced, C++ Core" required />
+                        </div>
+                        <div>
+                            <label class="form-label fw-bold">Minimum C-DAC Eligibility Percentage Cutoff</label>
+                            <input asp-for="CutoffPercentage" type="number" step="0.01" class="form-control" placeholder="e.g., 60.00" required />
+                        </div>
+                    </div>
+
+                    <div id="questionsContainerArena"></div>
+
+                    <div class="d-flex justify-content-between align-items-center mt-4 p-3 bg-white rounded shadow-sm border border-light-subtle">
+                        <button type="button" class="btn btn-outline-primary fw-bold" onclick="addQuestionBlockNode()">➕ Add Dynamic Question Element</button>
+                        <div>
+                            <a asp-action="Index" class="btn btn-outline-secondary me-2">Cancel</a>
+                            <button type="submit" class="btn btn-success px-5 fw-bold">🚀 Finalize & Save Examination</button>
+                        </div>
+                    </div>
+
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    let questionIndexCounter = 0;
+
+    // Injects a brand new interactive question tracking block node instantly down the stack frame
+    function addQuestionBlockNode() {
+        const index = questionIndexCounter++;
+        const targetArena = document.getElementById("questionsContainerArena");
+
+        const questionCard = document.createElement("div");
+        questionCard.className = "card border-start border-primary border-4 shadow-sm p-4 mb-4 bg-white rounded-3 dynamic-question-row";
+        questionCard.id = `question_block_${index}`;
+
+        questionCard.innerHTML = `
+            <div class="d-flex justify-content-between align-items-center mb-3 border-bottom pb-2">
+                <h6 class="text-primary mb-0 fw-bold">Question Element #${index + 1}</h6>
+                <button type="button" class="btn btn-sm btn-outline-danger" onclick="removeQuestionBlockNode(${index})">🗑️ Remove</button>
+            </div>
+
+            <div class="row g-3 mb-3">
+                <div class="col-md-8">
+                    <label class="form-label fw-bold small">Question Statement</label>
+                    <textarea name="Questions[${index}].QuestionText" class="form-control" rows="2" placeholder="Type query prompt rules text..." required></textarea>
+                </div>
+                <div class="col-md-4">
+                    <label class="form-label fw-bold small">Question Response Type</label>
+                    <select name="Questions[${index}].QuestionType" class="form-select" onchange="toggleOptionPanelLayoutVisibility(this, ${index})">
+                        <option value="Option">Multiple Choice (MCQ)</option>
+                        <option value="Written">Written / Descriptive Text</option>
+                    </select>
+                </div>
+            </div>
+
+            <div id="mcq_panel_index_${index}" class="bg-light p-3 rounded mb-3 border border-light-subtle">
+                <label class="form-label fw-bold small text-muted mb-2">Configure Multiple Choices Options</label>
+                <div class="row g-2 mb-2">
+                    <div class="col-6"><input type="text" class="form-control form-control-sm opt-val-${index}" placeholder="Option A" required /></div>
+                    <div class="col-6"><input type="text" class="form-control form-control-sm opt-val-${index}" placeholder="Option B" required /></div>
+                </div>
+                <div class="row g-2">
+                    <div class="col-6"><input type="text" class="form-control form-control-sm opt-val-${index}" placeholder="Option C" required /></div>
+                    <div class="col-6"><input type="text" class="form-control form-control-sm opt-val-${index}" placeholder="Option D" required /></div>
+                </div>
+                <input type="hidden" name="Questions[${index}].OptionsJson" id="hidden_options_json_${index}" />
+            </div>
+
+            <div class="row g-3">
+                <div class="col-md-6">
+                    <label class="form-label fw-bold small text-success">Exact Correct Answer Verification Match Key</label>
+                    <input type="text" name="Questions[${index}].CorrectAnswer" class="form-control form-control-sm" placeholder="e.g., Option A text or written keyword text values" required />
+                </div>
+                <div class="col-md-3">
+                    <label class="form-label fw-bold small text-primary">Positive Marks</label>
+                    <input type="number" name="Questions[${index}].PositiveMarks" class="form-control form-control-sm" value="4" required />
+                </div>
+                <div class="col-md-3">
+                    <label class="form-label fw-bold small text-danger">Penalty Marks</label>
+                    <input type="number" name="Questions[${index}].NegativeMarks" class="form-control form-control-sm" value="-1" required />
+                </div>
+            </div>
+        `;
+
+        targetArena.appendChild(questionCard);
+    }
+
+    function removeQuestionBlockNode(idIndex) {
+        const rowNode = document.getElementById(`question_block_${idIndex}`);
+        if(rowNode) rowNode.remove();
+    }
+
+    function toggleOptionPanelLayoutVisibility(dropdownNode, index) {
+        const panel = document.getElementById(`mcq_panel_index_${index}`);
+        const textInputs = panel.querySelectorAll("input[type='text']");
+
+        if (dropdownNode.value === "Written") {
+            panel.style.display = "none";
+            textInputs.forEach(el => el.removeAttribute("required"));
+        } else {
+            panel.style.display = "block";
+            textInputs.forEach(el => el.setAttribute("required", "required"));
+        }
+    }
+
+    // Intercept submit calls and clean serialize raw lists values arrays into hidden text bridges JSON
+    document.getElementById("googleFormEngine").addEventListener("submit", function(event) {
+        const subjectName = document.getElementById("examSubjectName").value.trim();
+
+        for (let i = 0; i < questionIndexCounter; i++) {
+            const block = document.getElementById(`question_block_${i}`);
+            if (!block) continue;
+
+            const hiddenJsonField = document.getElementById(`hidden_options_json_${i}`);
+            const panel = document.getElementById(`mcq_panel_index_${i}`);
+
+            if (panel.style.display !== "none") {
+                let optionsList = [];
+                panel.querySelectorAll(`.opt-val-${i}`).forEach(input => {
+                    if (input.value.trim() !== "") optionsList.push(input.value.trim());
+                });
+                hiddenJsonField.value = JSON.stringify(optionsList);
+            } else {
+                hiddenJsonField.value = null;
+            }
+
+            // Inject baseline structural subject text values directly dynamically to child blocks
+            const subInput = document.createElement("input");
+            subInput.type = "hidden";
+            subInput.name = `Questions[${i}].Subject`;
+            subInput.value = subjectName;
+            block.appendChild(subInput);
+        }
+    });
+</script>

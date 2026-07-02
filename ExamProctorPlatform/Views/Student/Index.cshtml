@@ -1,159 +1,58 @@
-﻿@model IEnumerable<ExamProctorPlatform.Models.Question>
-
+﻿@model IEnumerable<ExamProctorPlatform.Models.SubjectConfiguration>
 @{
-    ViewData["Title"] = "Advanced Secure Canvas";
+    ViewData["Title"] = "Student Grid Dashboard";
 }
 
-<input type="hidden" id="exam-session-id" value="@ViewBag.SessionId" />
-
-<div class="container-fluid mt-3">
-    <div class="row px-3">
-
-        <div class="col-md-9 px-4">
-            <div class="d-flex justify-content-between align-items-center mb-4 bg-white p-3 rounded shadow-sm border-start border-primary border-4">
-                <h3 class="text-secondary mb-0">💻 Live Secure Assessment Arena</h3>
-                <div class="fs-4 fw-bold text-danger bg-light px-3 py-1 rounded" id="timer-display">⏱️ 10:00</div>
+<div class="container mt-5">
+    <div class="p-3 bg-white shadow-sm rounded border-start border-success border-4 mb-4">
+        <h2 class="text-secondary mb-0">Student Assessment Gateway</h2>
+        <small class="text-muted font-monospace">Authorized Session Validation Active</small>
+    </div>
+    <div class="row">
+        @if (Model == null || !Model.Any())
+        {
+            <div class="col-12 text-center text-muted p-5 bg-white rounded border border-light-subtle shadow-sm">
+                You are currently ineligible for any active testing cycles or no tracks match your CDAC profile parameters scores.
             </div>
-
-            @if (!Model.Any())
+        }
+        else
+        {
+            foreach (var subject in Model)
             {
-                <div class="card p-5 text-center text-muted shadow-sm border-0">
-                    No advanced MCQ assessments currently loaded in the database bank.
-                </div>
-            }
-
-            @foreach (var q in Model)
-            {
-                <div class="card shadow-sm border-0 mb-4 rounded-3 overflow-hidden">
-                    <div class="card-header bg-dark text-white py-3 d-flex justify-content-between align-items-center">
-                        <span><strong>Question ID: #@q.Id</strong></span>
-                        <span class="badge bg-primary">Marks: @q.Marks</span>
-                    </div>
-                    <div class="card-body p-4 bg-white">
-                        <p class="fs-5 text-dark mb-4 fw-semibold">@q.QuestionText</p>
-
-                        <div class="options-container">
-                            @if (q.Options != null && q.Options.Any())
-                            {
-                                @foreach (var option in q.Options)
-                                {
-                                    <div class="form-check p-3 mb-2 rounded border border-light-subtle hover-select-node">
-                                        <input class="form-check-input ms-1" type="radio" name="question_@q.Id" value="@option">
-                                        <label class="form-check-label ms-3 text-dark fw-medium">@option</label>
-                                    </div>
-                                }
-                            }
-                            else
-                            {
-                                <textarea class="form-control anti-paste-field" rows="2" placeholder="Type your descriptive answer natively from keyboard..."></textarea>
-                            }
+                <div class="col-md-4 mb-4">
+                    <div class="card shadow-sm h-100 text-center border-0 bg-white rounded-3 overflow-hidden">
+                        <div class="card-body p-4">
+                            <div class="fs-1 mb-2">📄</div>
+                            <h4 class="fw-bold text-dark mb-4">@subject.SubjectName</h4>
+                            <button class="btn btn-success w-100 py-2 fw-bold" onclick="launchExamPopup('@Url.Action("VerifyExamAccess", "Student", new { subject = subject.SubjectName })')">🚀 Launch Secure Exam Window</button>
                         </div>
                     </div>
                 </div>
             }
-
-            <div class="text-center my-5">
-                <button class="btn btn-dark btn-lg px-5 py-3 shadow" onclick="triggerManualFinish()">Finalize & Submit Whole Exam Sheet</button>
-            </div>
-        </div>
-
-        <div class="col-md-3">
-            <div class="card border-0 shadow-sm sticky-top" style="top: 20px;">
-                <div class="card-header bg-danger text-white text-center fw-bold py-3 rounded-top">
-                    🤖 AI PROCTOR HARDWARE NODE
-                </div>
-                <div class="card-body bg-white text-center p-3">
-
-                    <div class="bg-black rounded-3 mb-3 border border-2 border-danger overflow-hidden" style="height: 180px; position: relative;">
-                        <video id="proctor-webcam" autoplay playsinline muted class="w-100 h-100" style="object-fit: cover;"></video>
-                        <div class="badge bg-danger opacity-75" style="position: absolute; bottom: 10px; left: 10px;">🔴 LIVE SCANNER</div>
-                    </div>
-
-                    <ul class="list-group list-group-flush text-start small font-monospace">
-                        <li class="list-group-item d-flex justify-content-between align-items-center">
-                            Window Switches: <span class="badge bg-secondary rounded-pill">Tracked Log</span>
-                        </li>
-                        <li class="list-group-item d-flex justify-content-between align-items-center">
-                            Clipboard Security: <span class="badge bg-success rounded-pill">Active</span>
-                        </li>
-                    </ul>
-                </div>
-            </div>
-        </div>
-
+        }
     </div>
 </div>
 
-<style>
-    .hover-select-node:hover {
-        background-color: #f8f9fa;
-        border-color: #0d6efd !important;
-        cursor: pointer;
-    }
-</style>
-
 <script>
-    let totalSeconds = 600; // 10 Minutes timer countdown duration ticks
-    const timerElement = document.getElementById("timer-display");
-    const sessionId = document.getElementById("exam-session-id").value;
+    function launchExamPopup(url) {
+        const width = window.screen.availWidth;
+        const height = window.screen.availHeight;
+        const popupOptions = `width=${width},height=${height},top=0,left=0,fullscreen=yes,directories=no,titlebar=no,toolbar=no,location=no,status=no,menubar=no,scrollbars=yes,resizable=no`;
 
-    // 1. Live Countdown Clock Timer Logic loop
-    const timerInterval = setInterval(() => {
-        let minutes = Math.floor(totalSeconds / 60);
-        let seconds = totalSeconds % 60;
-
-        seconds = seconds < 10 ? '0' + seconds : seconds;
-        timerElement.innerHTML = `⏱️ ${minutes}:${seconds}`;
-
-        if (totalSeconds <= 0) {
-            clearInterval(timerInterval);
-            alert("⏰ Time Limit Expired! Submitting answers automatically.");
-            window.location.href = "/Account/Logout";
+        const examWindow = window.open(url, "SecureExamPlatformWindow", popupOptions);
+        if (!examWindow) {
+            alert("🔒 Workspace initialization halted: Please allow window popups from browser toolbar configurations to launch the test frame.");
         }
-        totalSeconds--;
-    }, 1000);
-
-    // 2. Hardware Browser WebCam Media Stream activation hooks
-    if (navigator.mediaDevices && navigator.mediaDevices.getUserMedia) {
-        navigator.mediaDevices.getUserMedia({ video: true })
-        .then(function (stream) {
-            const videoElement = document.getElementById('proctor-webcam');
-            if (videoElement) {
-                videoElement.srcObject = stream;
-            }
-        })
-        .catch(function (error) {
-            console.log("Hardware Camera Access Blocked:", error);
-            alert("🚨 Hardware Access Denied: Camera tracking permission is mandatory to continue.");
-        });
-    }
-
-    // 3. Telemetry Sync Pipeline
-    function syncViolation(type) {
-        fetch(`/api/proctor/log-violation?type=${type}&sessionId=${sessionId}`, { method: 'POST' })
-        .then(res => res.json())
-        .then(data => {
-            if(data.status === "Blocked_By_Violation") {
-                window.location.reload();
-            }
-        });
-    }
-
-    // Proctor Anti-Cheat Event Observers
-    document.addEventListener('visibilitychange', () => { if (document.hidden) syncViolation("TabSwitch"); });
-    document.addEventListener('mouseleave', () => { syncViolation("MouseLeak"); });
-    document.addEventListener('copy', () => { syncViolation("CopyAttempt"); });
-
-    // Prevent Paste inside Textareas if any fallback descriptive questions are present
-    document.addEventListener('DOMContentLoaded', function() {
-        document.querySelectorAll('.anti-paste-field').forEach(el => {
-            el.addEventListener('paste', (e) => e.preventDefault());
-        });
-    });
-
-    function triggerManualFinish() {
-        clearInterval(timerInterval);
-        alert("Assessment Sheet finalized successfully!");
-        window.location.href = "/Account/Logout";
+        else {
+            const loopTimer = setInterval(() => {
+                if (examWindow.closed) {
+                    clearInterval(loopTimer);
+                    window.location.reload();
+                }
+                else {
+                    examWindow.focus();
+                }
+            }, 400);
+        }
     }
 </script>

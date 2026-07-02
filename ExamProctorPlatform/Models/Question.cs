@@ -10,16 +10,22 @@ namespace ExamProctorPlatform.Models
         public int Id { get; set; }
 
         [Required]
+        public string Subject { get; set; } = string.Empty;
+
+        [Required]
         public string QuestionText { get; set; } = string.Empty;
 
-        public string? OptionsJson { get; set; } // Database mein array JSON string bankar save hoga
+        [Required]
+        public string QuestionType { get; set; } = "Option";
+
+        public string? OptionsJson { get; set; }
 
         [Required]
         public string CorrectAnswer { get; set; } = string.Empty;
 
-        public int Marks { get; set; } = 2;
+        public int PositiveMarks { get; set; } = 4;
+        public int NegativeMarks { get; set; } = -1;
 
-        // Helper property: C# code mein dynamic List use karne ke liye
         [NotMapped]
         public List<string> Options
         {

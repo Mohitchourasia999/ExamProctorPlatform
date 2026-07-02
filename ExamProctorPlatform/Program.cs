@@ -46,4 +46,12 @@ app.MapControllerRoute(
     pattern: "{controller=Home}/{action=Index}/{id?}")
     .WithStaticAssets();
 
+// Automatically ensures local database and tables exist on startup
+// Automatically creates database and matching table columns on launch
+using (var scope = app.Services.CreateScope())
+{
+    var dbContext = scope.ServiceProvider.GetRequiredService<AppDbContext>();
+    dbContext.Database.EnsureCreated(); // Rebuilds fresh columns perfectly
+}
+
 app.Run();

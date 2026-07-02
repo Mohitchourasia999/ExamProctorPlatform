@@ -1,0 +1,70 @@
+﻿@model IEnumerable<ExamProctorPlatform.Models.ExamSession>
+
+@{
+    ViewData["Title"] = "Subject Results Breakdown";
+
+    // Sort logic structure: Active/Completed sorted by high score first, all Blocked users forced down below
+    var sortedSessions = Model.Where(s => s.Status != "Blocked_By_Violation").OrderByDescending(s => s.Score)
+                         .Concat(Model.Where(s => s.Status == "Blocked_By_Violation"))
+                         .ToList();
+}
+
+<div class="container mt-4">
+    <div class="mb-4">
+        <a asp-action="Index" class="btn btn-sm btn-outline-secondary">⬅ Back to Dashboard</a>
+        <h2 class="text-primary mt-2">Performance Tally: @ViewBag.Subject</h2>
+    </div>
+
+    <div class="card shadow">
+        <div class="card-header bg-danger text-white">
+            <h4 class="mb-0">Student Integrity Assessment Grid</h4>
+        </div>
+        <div class="card-body">
+            <table class="table table-hover align-middle">
+                <thead class="table-dark">
+                    <tr>
+                        <th>Session ID</th>
+                        <th>User ID</th>
+                        <th>Tab Violation Metrics Count</th>
+                        <th>Status</th>
+                        <th>Final Exam Score</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @if (sortedSessions == null || !sortedSessions.Any())
+                    {
+                        <tr>
+                            <td colspan="5" class="text-center text-muted">No student exam sheets recorded for this subject area framework.</td>
+                        </tr>
+                    }
+                    else
+                    {
+                        foreach (var session in sortedSessions)
+                        {
+                            <tr class="@(session.Status == "Blocked_By_Violation" ? "table-danger opacity-75" : "")">
+                                <td>@session.Id</td>
+                                <td>@session.UserId</td>
+                                <td><strong>@session.TabSwitches</strong> / 3 switches detected</td>
+                                <td>
+                                    <span class="badge @(session.Status == "Blocked_By_Violation" ? "bg-danger" : (session.Status == "Completed" ? "bg-success" : "bg-warning"))">
+                                        @session.Status
+                                    </span>
+                                </td>
+                                <td>
+                                    @if (session.Status == "Blocked_By_Violation")
+                                    {
+                                        <span class="fw-bold text-danger">@session.Score marks (Blocked at ID #@session.LastQuestionProcessedId)</span>
+                                    }
+                                    else
+                                    {
+                                        <span class="fw-bold text-success">@session.Score marks</span>
+                                    }
+                                </td>
+                            </tr>
+                        }
+                    }
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>

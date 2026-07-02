@@ -1,45 +1,65 @@
 ﻿@model ExamProctorPlatform.Models.Question
 
 @{
-    ViewData["Title"] = "Advanced Question Wizard";
+    ViewData["Title"] = "Create Question";
 }
 
 <div class="row justify-content-center mt-4">
     <div class="col-md-6">
         <div class="card shadow border-0">
             <div class="card-header bg-dark text-white text-center py-3">
-                <h4 class="mb-0">🧠 Create Advanced MCQ Assessment</h4>
+                <h4 class="mb-0">Create New Question</h4>
             </div>
             <div class="card-body p-4">
                 <form asp-action="Create" method="post">
+
+                    <div class="form-group mb-3">
+                        <label class="form-label fw-bold">Subject Name</label>
+                        <input asp-for="Subject" class="form-control" placeholder="e.g., Java, C++, Python" required />
+                    </div>
+
+                    <div class="form-group mb-3">
+                        <label class="form-label fw-bold">Question Specification Type</label>
+                        <select asp-for="QuestionType" id="q-type-select" class="form-select">
+                            <option value="Option">Multiple Choice (MCQ)</option>
+                            <option value="Written">Written / Descriptive Text</option>
+                        </select>
+                    </div>
+
                     <div class="form-group mb-3">
                         <label class="form-label fw-bold">Question Statement</label>
-                        <textarea asp-for="QuestionText" class="form-control" rows="3" placeholder="Type core problem statement..." required></textarea>
+                        <textarea asp-for="QuestionText" class="form-control" rows="3" placeholder="Type problem statement here..." required></textarea>
                     </div>
 
                     <input type="hidden" asp-for="OptionsJson" id="options-hidden-bridge" />
 
-                    <div class="card bg-light p-3 mb-3 border-0">
-                        <label class="form-label fw-bold text-secondary">🔧 Configure MCQ Choices Options</label>
-                        <div class="input-group mb-2"><input type="text" class="form-control option-input" placeholder="Option A" required /></div>
-                        <div class="input-group mb-2"><input type="text" class="form-control option-input" placeholder="Option B" required /></div>
-                        <div class="input-group mb-2"><input type="text" class="form-control option-input" placeholder="Option C" required /></div>
-                        <div class="input-group mb-2"><input type="text" class="form-control option-input" placeholder="Option D" required /></div>
+                    <div id="mcq-options-panel" class="card bg-light p-3 mb-3 border-0">
+                        <label class="form-label fw-bold text-secondary">Configure Options Choices</label>
+                        <div class="input-group mb-2"><input type="text" class="form-control option-input" placeholder="Option A" /></div>
+                        <div class="input-group mb-2"><input type="text" class="form-control option-input" placeholder="Option B" /></div>
+                        <div class="input-group mb-2"><input type="text" class="form-control option-input" placeholder="Option C" /></div>
+                        <div class="input-group mb-2"><input type="text" class="form-control option-input" placeholder="Option D" /></div>
                     </div>
 
                     <div class="form-group mb-3">
-                        <label class="form-label fw-bold text-success">🎯 Exact Correct Match (Answer Key)</label>
-                        <input asp-for="CorrectAnswer" class="form-control" id="correct-ans-field" placeholder="Must match one of the options text exactly" required />
+                        <label class="form-label fw-bold text-success">Exact Correct Answer Match Key</label>
+                        <input asp-for="CorrectAnswer" class="form-control" placeholder="Type answer matching rules text..." required />
                     </div>
 
-                    <div class="form-group mb-4">
-                        <label class="form-label fw-bold">Weightage Marks</label>
-                        <input asp-for="Marks" type="number" class="form-control" value="4" required />
+                    <div class="row mb-4">
+                        <div class="col-md-6">
+                            <label class="form-label fw-bold text-primary">Positive Marks</label>
+                            <input asp-for="PositiveMarks" type="number" class="form-control" value="4" required />
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label fw-bold text-danger">Negative Marks</label>
+                            <input asp-for="NegativeMarks" type="number" class="form-control" value="-1" required />
+                        </div>
                     </div>
 
                     <div class="d-flex justify-content-between">
                         <a asp-action="Index" class="btn btn-outline-secondary">Back</a>
-                        <button type="submit" id="submit-btn" class="btn btn-dark px-4">Compile Question</button>
+                        <button type="submit" id="submit-btn" class="btn btn-dark px-4">Save Question</button>
                     </div>
                 </form>
             </div>
@@ -48,12 +68,24 @@
 </div>
 
 <script>
+    document.getElementById("q-type-select").addEventListener("change", function() {
+        const panel = document.getElementById("mcq-options-panel");
+        if(this.value === "Written") {
+            panel.style.display = "none";
+        } else {
+            panel.style.display = "block";
+        }
+    });
+
     document.getElementById("submit-btn").addEventListener("click", function() {
-        let opts = [];
-        document.querySelectorAll(".option-input").forEach(input => {
-            if(input.value.trim() !== "") opts.push(input.value.trim());
-        });
-        // Conver array elements into single serialised string schema packet
-        document.getElementById("options-hidden-bridge").value = JSON.stringify(opts);
+        if(document.getElementById("q-type-select").value === "Option") {
+            let opts = [];
+            document.querySelectorAll(".option-input").forEach(input => {
+                if(input.value.trim() !== "") opts.push(input.value.trim());
+            });
+            document.getElementById("options-hidden-bridge").value = JSON.stringify(opts);
+        } else {
+            document.getElementById("options-hidden-bridge").value = null;
+        }
     });
 </script>

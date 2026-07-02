@@ -1,25 +1,30 @@
-using ExamProctorPlatform.Models;
+using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Mvc;
-using System.Diagnostics;
 
 namespace ExamProctorPlatform.Controllers
 {
     public class HomeController : Controller
     {
-        public IActionResult Index()
+        public async Task<IActionResult> Index()
         {
+            // If the user navigates out to the landing page, automatically terminate their session cookie
+            if (User.Identity != null && User.Identity.IsAuthenticated)
+            {
+                await HttpContext.SignOutAsync("CookieAuth");
+                return RedirectToAction("Index");
+            }
             return View();
         }
 
-        public IActionResult Privacy()
+        public async Task<IActionResult> Privacy()
         {
+            // Clean logout when hitting privacy policy from outside the dashboard
+            if (User.Identity != null && User.Identity.IsAuthenticated)
+            {
+                await HttpContext.SignOutAsync("CookieAuth");
+                return RedirectToAction("Privacy");
+            }
             return View();
-        }
-
-        [ResponseCache(Duration = 0, Location = ResponseCacheLocation.None, NoStore = true)]
-        public IActionResult Error()
-        {
-            return View(new ErrorViewModel { RequestId = Activity.Current?.Id ?? HttpContext.TraceIdentifier });
         }
     }
 }
